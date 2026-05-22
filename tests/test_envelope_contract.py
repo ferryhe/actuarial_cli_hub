@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from actuarial_cli_hub.runtime.artifacts import RunArtifacts
 from actuarial_cli_hub.runtime.envelope import error_envelope, success_envelope
 
@@ -68,3 +70,9 @@ def test_run_artifacts_write_json(tmp_path) -> None:
     assert ref.id == "diagnostics"
     assert ref.path.endswith("output/diagnostics.json")
     assert json.loads((tmp_path / "runs" / "demo" / "output" / "diagnostics.json").read_text()) == {"ok": True}
+
+
+@pytest.mark.parametrize("run_id", ["", ".", "..", "../escape", "nested/demo", "/tmp/demo"])
+def test_run_artifacts_reject_path_like_run_ids(run_id: str) -> None:
+    with pytest.raises(ValueError, match="run_id"):
+        RunArtifacts(run_id)

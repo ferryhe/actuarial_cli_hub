@@ -24,6 +24,8 @@ class RunArtifacts:
     """
 
     def __init__(self, run_id: str, root: Path | None = None) -> None:
+        if not run_id or run_id in {".", ".."} or Path(run_id).name != run_id:
+            raise ValueError("run_id must be a non-directory name")
         self.run_id = run_id
         self.root = root or Path(".tmp") / "actuarial-cli-runs" / run_id
         self.output_dir = self.root / "output"
