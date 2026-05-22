@@ -186,8 +186,12 @@ def _load_catalog_source(source_path: Path) -> dict[str, Any]:
         if not isinstance(entry, dict) or not entry.get("id"):
             raise ValueError(f"Catalog source entry {index} must be a mapping with an id.")
 
+    limitations = raw["limitations"] if "limitations" in raw else _default_catalog_source()["limitations"]
+    if not isinstance(limitations, list) or not all(isinstance(item, str) for item in limitations):
+        raise ValueError("Catalog source limitations must be a list of strings when provided.")
+
     return {
         "source": str(raw.get("source") or source_path.stem),
         "entries": entries,
-        "limitations": list(raw.get("limitations") or _default_catalog_source()["limitations"]),
+        "limitations": limitations,
     }

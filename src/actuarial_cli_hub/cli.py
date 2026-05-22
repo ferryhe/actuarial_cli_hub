@@ -282,7 +282,7 @@ def _emit_reference_payload(args: argparse.Namespace, payload: dict[str, Any], *
     return 0
 
 
-def _emit_reference_error(args: argparse.Namespace, *, tool: str, exc: ValueError) -> int:
+def _emit_reference_error(args: argparse.Namespace, *, tool: str, exc: ValueError | OSError) -> int:
     payload = error_envelope(
         tool=tool,
         run_id=getattr(args, "run_id", "reference"),

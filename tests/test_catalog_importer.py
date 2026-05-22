@@ -107,6 +107,39 @@ limitations:
     assert payload["data"]["summary"]["source_path"] == str(source)
 
 
+def test_catalog_importer_rejects_non_list_limitations(tmp_path: Path) -> None:
+    source = tmp_path / "bad-limitations.yaml"
+    source.write_text(
+        """
+source: reviewed-catalog
+entries:
+  - id: custom-tool
+limitations: ""
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_actuarial_cli.py",
+            "registry",
+            "import-catalog",
+            "--source",
+            str(source),
+            "--json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 2
+    payload = json.loads(proc.stdout)
+    assert payload["error"]["code"] == "invalid_input"
+    assert "limitations must be a list of strings" in payload["error"]["message"]
+
+
 def test_catalog_importer_malformed_yaml_source_returns_json_error(tmp_path: Path) -> None:
     source = tmp_path / "bad.yaml"
     source.write_text("entries: [\n", encoding="utf-8")
