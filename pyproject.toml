@@ -23,6 +23,10 @@ chainladder = [
 cashflower = [
   "cashflower>=0.10",
 ]
+lifelib = [
+  "lifelib>=0.11",
+  "modelx>=0.26",
+]
 dev = [
   "aggregate>=0.30.1",
   "cashflower>=0.10",
