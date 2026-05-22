@@ -29,6 +29,7 @@ def normalize_declaration(declaration: str) -> str:
 
     tokens = text.split()
     normalized_tokens = [token.lower() for token in tokens]
+    body_tokens = normalized_tokens[2:]
     exposure_tokens = {"claims", "claim", "loss", "prem", "premium", "exposure"}
     frequency_tokens = {
         "dfreq",
@@ -44,16 +45,16 @@ def normalize_declaration(declaration: str) -> str:
         "neymana",
         "mixed",
     }
-    if not ({*exposure_tokens, "dfreq"} & set(normalized_tokens)):
+    if not ({*exposure_tokens, "dfreq"} & set(body_tokens)):
         raise ValueError("aggregate declaration must include a frequency/exposure clause")
-    has_severity = any(token in {"sev", "dsev"} or token.startswith(("sev.", "dsev")) for token in normalized_tokens)
+    has_severity = any(token in {"sev", "dsev"} or token.startswith(("sev.", "dsev")) for token in body_tokens)
     if not has_severity:
         raise ValueError("aggregate declaration must include a severity clause")
 
     # Append a default only for the compact roadmap form. Explicit aggregate
     # frequency families, discrete frequency declarations (dfreq), and
     # parameterized forms such as ``negbin 2`` are passed through unchanged.
-    return text if set(normalized_tokens[2:]) & frequency_tokens else f"{text} {DEFAULT_FREQUENCY}"
+    return text if set(body_tokens) & frequency_tokens else f"{text} {DEFAULT_FREQUENCY}"
 
 
 def aggregate_version() -> str:

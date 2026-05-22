@@ -18,6 +18,15 @@ def test_aggregate_declaration_normalizes_roadmap_shorthand() -> None:
     assert normalize_declaration("agg Premium 1000 prem at 0.6 lr sev gamma 100 cv 1") == "agg Premium 1000 prem at 0.6 lr sev gamma 100 cv 1 poisson"
 
 
+def test_aggregate_declaration_validation_ignores_line_name_tokens() -> None:
+    try:
+        normalize_declaration("agg Premium 100 sev lognorm 50 cv 1")
+    except ValueError as exc:
+        assert "frequency/exposure" in str(exc)
+    else:  # pragma: no cover - defensive clarity for this regression test.
+        raise AssertionError("line names must not satisfy exposure validation")
+
+
 def test_aggregate_result_contract_contains_summary_and_quantiles() -> None:
     result = build_aggregate_result(ROADMAP_DECL, log2=16)
 
