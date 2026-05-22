@@ -41,7 +41,9 @@ def test_missing_schema_is_not_ready(tmp_path) -> None:
 def test_runtime_availability_is_explicit() -> None:
     manifests = load_manifests()
     assert manifests
-    assert {manifest.runtime_availability for manifest in manifests} == {"planned"}
+    availability = {manifest.tool_id: manifest.runtime_availability for manifest in manifests}
+    assert availability["actuarial.reserve.chainladder"] == "implemented"
+    assert set(availability.values()) <= {"planned", "implemented", "external"}
 
 
 def test_installed_data_roots_include_user_base() -> None:
