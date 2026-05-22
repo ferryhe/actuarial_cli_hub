@@ -8,6 +8,11 @@ upstream:
   repo: https://github.com/<owner>/<repo>
   package: <package-or-project-name>
   language: python
+conversion:
+  class: <python-library|python-dsl|python-model-runner|julia-adapter|r-adapter|application-spike|reference-pack|catalog-importer>
+  form: <short description of the wrapper or reference shape>
+  dependencyWeight: <light|medium|heavy|optional|reference-only>
+  readiness: cataloged
 runtime:
   kind: cli
   availability: planned

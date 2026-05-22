@@ -27,7 +27,17 @@ def write_tool_outputs(*, input_path: Path, output_path: Path | None, diagnostic
             details={"input": str(input_path)},
         ).to_dict()
 
-    case = json.loads(input_path.read_text(encoding="utf-8"))
+    try:
+        case = json.loads(input_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return error_envelope(
+            tool=TOOL_ID,
+            run_id=run_id,
+            code="invalid_input",
+            message=f"Input file is not valid JSON: {input_path}",
+            details={"input": str(input_path), "line": exc.lineno, "column": exc.colno},
+        ).to_dict()
+
     result = {"input": case, "note": "replace template logic with a public upstream call"}
     diagnostics = {"runtime": "template", "input_path": str(input_path)}
 

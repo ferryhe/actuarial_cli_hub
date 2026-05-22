@@ -30,6 +30,7 @@ Not every target becomes an executable calculation command.
 Before implementing the adapter, define:
 
 - Tool id, status, runtime kind, availability, and priority in `registry/tools/<tool>.yaml`.
+- Conversion metadata required by the manifest schema: `conversion.class`, `conversion.form`, `conversion.dependencyWeight`, and `conversion.readiness` when useful.
 - Input and output schemas under `registry/schemas/` when a new domain shape is needed.
 - Artifact ids and filenames. Keep success envelopes and registry declarations in lockstep.
 - Error envelopes and codes: use `invalid_input`, `runtime_missing`, `runtime_unavailable`, `not_implemented`, or `upstream_failure` as appropriate.
