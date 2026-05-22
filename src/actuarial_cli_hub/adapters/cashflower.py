@@ -131,7 +131,7 @@ def write_cashflower_outputs(
 def _run_cashflower_in_directory(cashflower: Any, work_dir: Path, settings: dict[str, Any]) -> tuple[Any, Any, list[Any]]:
     previous_cwd = Path.cwd()
     old_path = list(sys.path)
-    old_argv = list(sys.argv)
+    old_argv = sys.argv[:]
     old_modules = dict(sys.modules)
     project_module_names = _project_module_names(work_dir)
     for name in list(sys.modules):
@@ -142,7 +142,7 @@ def _run_cashflower_in_directory(cashflower: Any, work_dir: Path, settings: dict
         # cashflower.run parses process argv internally. Keep the adapter
         # isolated from pytest/Hermes flags such as ``-vv`` so in-process
         # tests and callers are deterministic.
-        sys.argv = ["cashflower"]
+        sys.argv[:] = ["cashflower"]
         import os
 
         os.chdir(work_dir)
@@ -156,7 +156,7 @@ def _run_cashflower_in_directory(cashflower: Any, work_dir: Path, settings: dict
         import os
 
         os.chdir(previous_cwd)
-        sys.argv = old_argv
+        sys.argv[:] = old_argv
         sys.path[:] = old_path
         _restore_modules_after_temp_run(old_modules, work_dir, project_module_names)
 
