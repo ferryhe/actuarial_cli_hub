@@ -1,7 +1,7 @@
 id: actuarial.reserve.chainladder
 version: actuarial-reserving.v1
 name: Chainladder Reserving
-status: manifested
+status: experimental
 category: reserving
 priority: P0
 upstream:
@@ -14,14 +14,14 @@ conversion:
   class: python-library
   form: full wrapper around public chainladder reserving APIs
   dependencyWeight: medium
-  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+  readiness: Runtime wrapper, fixture, deterministic result artifact, diagnostics, explanation, and tests are available.
 runtime:
   kind: cli
   command:
     - actuary
     - reserve
     - chainladder
-  availability: planned
+  availability: implemented
   allowedCommandPrefix: actuary reserve chainladder
   timeoutMs: 300000
   maxOutputBytes: 1048576

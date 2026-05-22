@@ -4,6 +4,7 @@ import argparse
 import json
 import platform
 import sys
+from pathlib import Path
 from typing import Any, Sequence
 
 from actuarial_cli_hub import __version__
@@ -39,6 +40,21 @@ def build_parser() -> argparse.ArgumentParser:
     doctor = subparsers.add_parser("doctor", help="Report core CLI readiness.")
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     doctor.set_defaults(func=cmd_doctor)
+
+    reserve = subparsers.add_parser("reserve", help="Run reserving adapters.")
+    reserve_sub = reserve.add_subparsers(dest="reserve_command", required=True)
+    chainladder = reserve_sub.add_parser(
+        "chainladder",
+        help="Run deterministic chain-ladder reserving.",
+        description="Run deterministic chain-ladder reserving.",
+    )
+    chainladder.add_argument("--input", required=True, help="Wide cumulative triangle CSV with an origin column.")
+    chainladder.add_argument("--output", required=True, help="Path for deterministic_result JSON.")
+    chainladder.add_argument("--diagnostics-output", required=True, help="Path for diagnostics JSON.")
+    chainladder.add_argument("--explain-output", required=True, help="Path for explanation Markdown.")
+    chainladder.add_argument("--run-id", default="chainladder", help="Run identifier for the stdout envelope.")
+    chainladder.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    chainladder.set_defaults(func=cmd_reserve_chainladder)
 
     return parser
 
@@ -102,6 +118,68 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         print(f"actuarial-cli-hub {data['package_version']} on Python {data['python']}")
         print(f"registry_ok={data['registry_ok']} manifest_count={data['manifest_count']}")
     return 0 if validation.ok else 1
+
+
+def cmd_reserve_chainladder(args: argparse.Namespace) -> int:
+    try:
+        from actuarial_cli_hub.adapters.chainladder import write_chainladder_outputs
+
+        payload = write_chainladder_outputs(
+            input_path=Path(args.input),
+            output_path=Path(args.output),
+            diagnostics_path=Path(args.diagnostics_output),
+            explanation_path=Path(args.explain_output),
+            run_id=args.run_id,
+        )
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"chainladder", "pandas"}:
+            raise
+        payload = error_envelope(
+            tool="actuarial.reserve.chainladder",
+            run_id=args.run_id,
+            code="runtime_missing",
+            message="The chainladder runtime is not installed. Install with: pip install 'actuarial-cli-hub[chainladder]'",
+            details={"missing_module": exc.name},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(payload["error"]["message"], file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        payload = error_envelope(
+            tool="actuarial.reserve.chainladder",
+            run_id=args.run_id,
+            code="invalid_input",
+            message=str(exc),
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(str(exc), file=sys.stderr)
+        return 2
+    except OSError as exc:
+        payload = error_envelope(
+            tool="actuarial.reserve.chainladder",
+            run_id=args.run_id,
+            code="invalid_input",
+            message=f"Could not read triangle input: {exc}",
+            details={"input_path": args.input},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(payload["error"]["message"], file=sys.stderr)
+        return 2
+    if args.json:
+        emit_json(payload)
+    else:
+        summary = payload["data"]["summary"]
+        print(
+            "chainladder ultimate="
+            f"{summary['ultimate']} latest={summary['latest']} ibnr={summary['ibnr']}"
+        )
+    return 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
