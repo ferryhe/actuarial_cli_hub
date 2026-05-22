@@ -1,7 +1,7 @@
 id: actuarial.loss.aggregate
 version: actuarial-aggregate-loss.v1
 name: Aggregate Loss
-status: manifested
+status: experimental
 category: aggregate_loss
 priority: P0
 upstream:
@@ -14,14 +14,14 @@ conversion:
   class: python-dsl
   form: full wrapper around aggregate DSL declarations
   dependencyWeight: medium
-  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+  readiness: Runtime wrapper, roadmap fixture, JSON envelope behavior, and focused tests are implemented.
 runtime:
   kind: cli
   command:
     - actuary
     - loss
     - aggregate
-  availability: planned
+  availability: implemented
   allowedCommandPrefix: actuary loss aggregate
   timeoutMs: 300000
   maxOutputBytes: 1048576
@@ -39,4 +39,4 @@ agent:
     - Teaching collective risk model workflows
   limitations:
     - DSL declarations must be reviewed by a qualified actuary
-    - Runtime availability is verified in a later wrapper PR
+    - The roadmap shorthand defaults to Poisson when no frequency family is supplied

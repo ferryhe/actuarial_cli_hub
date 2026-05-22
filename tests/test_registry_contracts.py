@@ -42,6 +42,7 @@ def test_runtime_availability_is_explicit() -> None:
     manifests = load_manifests()
     assert manifests
     availability = {manifest.tool_id: manifest.runtime_availability for manifest in manifests}
+    assert availability["actuarial.loss.aggregate"] == "implemented"
     assert availability["actuarial.reserve.chainladder"] == "implemented"
     assert set(availability.values()) <= {"planned", "implemented", "external"}
 

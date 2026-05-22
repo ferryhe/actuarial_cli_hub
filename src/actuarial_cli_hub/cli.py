@@ -56,6 +56,26 @@ def build_parser() -> argparse.ArgumentParser:
     chainladder.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
     chainladder.set_defaults(func=cmd_reserve_chainladder)
 
+    loss = subparsers.add_parser("loss", help="Run aggregate loss adapters.")
+    loss_sub = loss.add_subparsers(dest="loss_command", required=True)
+    aggregate = loss_sub.add_parser(
+        "aggregate",
+        help="Run an aggregate loss DSL declaration.",
+        description="Run an aggregate loss DSL declaration with the aggregate package.",
+    )
+    aggregate.add_argument(
+        "--decl",
+        required=True,
+        help="Aggregate DSL declaration, for example: agg MyLine 100 claims 1000 xs 0 sev lognorm 50 cv 1",
+    )
+    aggregate.add_argument("--output", required=True, help="Path for aggregate_result JSON.")
+    aggregate.add_argument("--diagnostics-output", help="Optional path for diagnostics JSON; defaults beside --output.")
+    aggregate.add_argument("--explain-output", required=True, help="Path for explanation Markdown.")
+    aggregate.add_argument("--run-id", default="aggregate", help="Run identifier for the stdout envelope.")
+    aggregate.add_argument("--log2", type=int, default=16, help="Aggregate grid log2 size.")
+    aggregate.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    aggregate.set_defaults(func=cmd_loss_aggregate)
+
     return parser
 
 
@@ -178,6 +198,70 @@ def cmd_reserve_chainladder(args: argparse.Namespace) -> int:
         print(
             "chainladder ultimate="
             f"{summary['ultimate']} latest={summary['latest']} ibnr={summary['ibnr']}"
+        )
+    return 0
+
+
+def cmd_loss_aggregate(args: argparse.Namespace) -> int:
+    try:
+        from actuarial_cli_hub.adapters.aggregate import write_aggregate_outputs
+
+        payload = write_aggregate_outputs(
+            declaration=args.decl,
+            output_path=Path(args.output),
+            diagnostics_path=Path(args.diagnostics_output) if args.diagnostics_output else None,
+            explanation_path=Path(args.explain_output),
+            run_id=args.run_id,
+            log2=args.log2,
+        )
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"aggregate", "pandas", "numpy", "scipy"}:
+            raise
+        payload = error_envelope(
+            tool="actuarial.loss.aggregate",
+            run_id=args.run_id,
+            code="runtime_missing",
+            message="The aggregate runtime is not installed. Install with: pip install 'actuarial-cli-hub[aggregate]'",
+            details={"missing_module": exc.name},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(payload["error"]["message"], file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        payload = error_envelope(
+            tool="actuarial.loss.aggregate",
+            run_id=args.run_id,
+            code="invalid_input",
+            message=str(exc),
+            details={"declaration": args.decl},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(str(exc), file=sys.stderr)
+        return 2
+    except Exception as exc:
+        payload = error_envelope(
+            tool="actuarial.loss.aggregate",
+            run_id=args.run_id,
+            code="upstream_failure",
+            message=f"aggregate runtime failed: {exc}",
+            details={"declaration": args.decl},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(payload["error"]["message"], file=sys.stderr)
+        return 2
+    if args.json:
+        emit_json(payload)
+    else:
+        summary = payload["data"]["summary"]
+        print(
+            "aggregate expected_loss="
+            f"{summary['expected_loss']} cv={summary['coefficient_of_variation']}"
         )
     return 0
 
