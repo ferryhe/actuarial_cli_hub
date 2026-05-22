@@ -1,0 +1,33 @@
+schema_version: actuarial-cli-tool-card.v1
+id: actuarial.lifecontingencies.r
+name: R lifecontingencies
+status: cataloged
+priority: P2
+runtime:
+  kind: optional-cli
+  availability: planned
+  command:
+  - actuary
+  - lifecontingencies
+  - r
+  allowedCommandPrefix: actuary lifecontingencies r
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+  - deterministic_result
+  - diagnostics
+agent:
+  skillPath: skills/hermes/life_contingencies/SKILL.md
+  useCases:
+  - Life contingency examples through R
+  - Cross-runtime adapter validation
+  limitations:
+  - Requires R runtime when executed
+  - Tests must skip gracefully when R is absent
+upstream:
+  repo: https://cran.r-project.org/package=lifecontingencies
+  package: lifecontingencies
+  language: r
+  license: GPL-2/GPL-3
+  install: Rscript install.packages("lifecontingencies")

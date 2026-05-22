@@ -1,0 +1,33 @@
+schema_version: actuarial-cli-tool-card.v1
+id: actuarial.catalog.actuarial_foss
+name: Actuarial FOSS Catalog
+status: cataloged
+priority: P0/P1
+runtime:
+  kind: catalog
+  availability: planned
+  command:
+  - actuary
+  - registry
+  - import-catalog
+  allowedCommandPrefix: actuary registry import-catalog
+io:
+  inputSchema: registry/schemas/reference-query.schema.json
+  outputSchema: registry/schemas/reference-result.schema.json
+  artifacts:
+  - run_manifest
+  - diagnostics
+agent:
+  skillPath: skills/hermes/catalog/SKILL.md
+  useCases:
+  - Discover actuarial OSS candidates
+  - Seed future registry entries
+  limitations:
+  - Catalog entries must be reviewed before promotion
+  - Upstream licenses vary by project
+upstream:
+  repo: https://github.com/terence-lim/actuarial-foss
+  package: actuarial-foss
+  language: catalog
+  license: varies
+  install: not applicable

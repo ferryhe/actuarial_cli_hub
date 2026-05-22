@@ -1,0 +1,34 @@
+schema_version: actuarial-cli-tool-card.v1
+id: actuarial.life.lifelib
+name: lifelib Template Runner
+status: cataloged
+priority: P1/P2
+runtime:
+  kind: optional-cli
+  availability: planned
+  command:
+  - actuary
+  - life
+  - lifelib
+  allowedCommandPrefix: actuary life lifelib
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+  - deterministic_result
+  - diagnostics
+  - run_manifest
+agent:
+  skillPath: skills/hermes/life_modeling/SKILL.md
+  useCases:
+  - Life model template experiments
+  - IFRS 17 style educational workflows
+  limitations:
+  - Large model libraries remain upstream
+  - Optional dependencies must be checked by doctor
+upstream:
+  repo: https://github.com/lifelib-dev/lifelib
+  package: lifelib
+  language: python
+  license: MIT
+  install: pip install lifelib modelx

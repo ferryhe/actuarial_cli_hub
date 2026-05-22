@@ -41,6 +41,19 @@ def build_parser() -> argparse.ArgumentParser:
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     doctor.set_defaults(func=cmd_doctor)
 
+    skills = subparsers.add_parser("skills", help="Export agent-facing skills and portable tool cards.")
+    skills_sub = skills.add_subparsers(dest="skills_command", required=True)
+    skills_export = skills_sub.add_parser("export", help="Generate skill/tool-card files from registry metadata.")
+    skills_export.add_argument(
+        "--target",
+        choices=("hermes", "generic", "ai_interface"),
+        default="generic",
+        help="Export format to generate.",
+    )
+    skills_export.add_argument("--output", "--output-dir", dest="output_dir", required=True, help="Directory for generated files.")
+    skills_export.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    skills_export.set_defaults(func=cmd_skills_export)
+
     reserve = subparsers.add_parser("reserve", help="Run reserving adapters.")
     reserve_sub = reserve.add_subparsers(dest="reserve_command", required=True)
     chainladder = reserve_sub.add_parser(
@@ -138,6 +151,40 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         print(f"actuarial-cli-hub {data['package_version']} on Python {data['python']}")
         print(f"registry_ok={data['registry_ok']} manifest_count={data['manifest_count']}")
     return 0 if validation.ok else 1
+
+
+def cmd_skills_export(args: argparse.Namespace) -> int:
+    from actuarial_cli_hub.skills.generator import export_skills
+
+    try:
+        exported = export_skills(target=args.target, output_dir=Path(args.output_dir))
+    except ValueError as exc:
+        payload = error_envelope(
+            tool="actuarial_cli_hub.skills.export",
+            run_id="skills-export",
+            code="invalid_input",
+            message=str(exc),
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(str(exc), file=sys.stderr)
+        return 2
+
+    data = {
+        "target": args.target,
+        "output_dir": str(Path(args.output_dir)),
+        "count": len(exported),
+        "files": [str(item.path) for item in exported],
+        "tools": [item.tool_id for item in exported],
+    }
+    payload = success_envelope(tool="actuarial_cli_hub.skills.export", run_id="skills-export", data=data).to_dict()
+    if args.json:
+        emit_json(payload)
+    else:
+        for file_path in data["files"]:
+            print(file_path)
+    return 0
 
 
 def cmd_reserve_chainladder(args: argparse.Namespace) -> int:
