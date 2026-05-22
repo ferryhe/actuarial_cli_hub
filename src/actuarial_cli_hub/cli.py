@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import platform
 import sys
@@ -39,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     registry_validate.set_defaults(func=cmd_registry_validate)
 
     doctor = subparsers.add_parser("doctor", help="Report core CLI readiness.")
+    doctor.add_argument("--runtime", choices=("lifelib", "modelx"), help="Optional runtime readiness check.")
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     doctor.set_defaults(func=cmd_doctor)
 
@@ -105,6 +107,17 @@ def build_parser() -> argparse.ArgumentParser:
     cashflower.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
     cashflower.set_defaults(func=cmd_cashflow_cashflower)
 
+    life = subparsers.add_parser("life", help="Run life/model-library adapters.")
+    life_sub = life.add_subparsers(dest="life_command", required=True)
+    lifelib = life_sub.add_parser(
+        "lifelib",
+        help="Check or run lifelib/modelx template workflows.",
+        description="Optional lifelib/modelx template runner boundary; use doctor to verify runtimes before execution.",
+    )
+    lifelib.add_argument("--run-id", default="lifelib", help="Run identifier for the stdout envelope.")
+    lifelib.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    lifelib.set_defaults(func=cmd_life_lifelib)
+
     return parser
 
 
@@ -144,6 +157,21 @@ def cmd_registry_validate(args: argparse.Namespace) -> int:
 
 def cmd_doctor(args: argparse.Namespace) -> int:
     validation = validate_registry()
+    if args.runtime:
+        if not validation.ok:
+            payload = error_envelope(
+                tool=f"actuarial_cli_hub.doctor.{args.runtime}",
+                run_id=f"doctor-{args.runtime}",
+                code="registry_invalid",
+                message="Registry validation failed",
+                details={"validation": validation.to_dict(), "runtime": args.runtime},
+            ).to_dict()
+            if args.json:
+                emit_json(payload)
+            else:
+                print(payload["error"]["message"], file=sys.stderr)
+            return 1
+        return cmd_runtime_doctor(args, validation.ok)
     data = {
         "python": sys.version.split()[0],
         "platform": platform.platform(),
@@ -167,6 +195,48 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         print(f"actuarial-cli-hub {data['package_version']} on Python {data['python']}")
         print(f"registry_ok={data['registry_ok']} manifest_count={data['manifest_count']}")
     return 0 if validation.ok else 1
+
+
+def cmd_runtime_doctor(args: argparse.Namespace, registry_ok: bool) -> int:
+    packages, missing = _runtime_packages(args.runtime)
+    data = {
+        "runtime": args.runtime,
+        "packages": {name: name not in missing for name in packages},
+        "available": not missing,
+        "registry_ok": registry_ok,
+    }
+    if not registry_ok:
+        payload = error_envelope(
+            tool=f"actuarial_cli_hub.doctor.{args.runtime}",
+            run_id=f"doctor-{args.runtime}",
+            code="registry_invalid",
+            message="Registry validation failed",
+            details=data,
+        ).to_dict()
+        exit_code = 1
+    elif missing:
+        payload = error_envelope(
+            tool=f"actuarial_cli_hub.doctor.{args.runtime}",
+            run_id=f"doctor-{args.runtime}",
+            code="runtime_missing",
+            message=f"Optional runtime is not installed: {', '.join(missing)}",
+            details=data,
+        ).to_dict()
+        exit_code = 2
+    else:
+        payload = success_envelope(tool=f"actuarial_cli_hub.doctor.{args.runtime}", run_id=f"doctor-{args.runtime}", data=data).to_dict()
+        exit_code = 0
+    if args.json:
+        emit_json(payload)
+    else:
+        print(f"{args.runtime} available={data['available']} missing={missing}")
+    return exit_code
+
+
+def _runtime_packages(runtime: str) -> tuple[list[str], list[str]]:
+    packages = ["lifelib", "modelx"] if runtime == "lifelib" else [runtime]
+    missing = [name for name in packages if importlib.util.find_spec(name) is None]
+    return packages, missing
 
 
 def cmd_skills_export(args: argparse.Namespace) -> int:
@@ -331,6 +401,35 @@ def cmd_loss_aggregate(args: argparse.Namespace) -> int:
             f"{summary['expected_loss']} cv={summary['coefficient_of_variation']}"
         )
     return 0
+
+def cmd_life_lifelib(args: argparse.Namespace) -> int:
+    packages, missing = _runtime_packages("lifelib")
+    if missing:
+        payload = error_envelope(
+            tool="actuarial.life.lifelib",
+            run_id=args.run_id,
+            code="runtime_missing",
+            message="lifelib/modelx template execution requires optional dependencies. Install with: pip install 'actuarial-cli-hub[lifelib]'",
+            details={"runtime": "lifelib", "required_packages": packages, "missing_packages": missing},
+        ).to_dict()
+    else:
+        payload = error_envelope(
+            tool="actuarial.life.lifelib",
+            run_id=args.run_id,
+            code="not_implemented",
+            message="lifelib/modelx are installed, but template execution is intentionally not implemented in this boundary PR.",
+            details={
+                "runtime": "lifelib",
+                "required_packages": packages,
+                "next_step": "Add a fixture-backed template runner before promoting this wrapper to experimental.",
+            },
+        ).to_dict()
+    if args.json:
+        emit_json(payload)
+    else:
+        print(payload["error"]["message"], file=sys.stderr)
+    return 2
+
 
 def cmd_cashflow_cashflower(args: argparse.Namespace) -> int:
     try:
