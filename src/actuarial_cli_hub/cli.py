@@ -41,6 +41,15 @@ def build_parser() -> argparse.ArgumentParser:
     registry_validate.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     registry_validate.set_defaults(func=cmd_registry_validate)
 
+    import_catalog = registry_sub.add_parser("import-catalog", help="Create a reviewed catalog seed artifact.")
+    import_catalog.add_argument("--query", default="actuarial open-source software", help="Catalog search/query label.")
+    import_catalog.add_argument("--source", help="Optional reviewed YAML/JSON catalog source file.")
+    import_catalog.add_argument("--output", help="Optional path for run_manifest JSON; defaults under the run root.")
+    import_catalog.add_argument("--diagnostics-output", help="Optional path for diagnostics JSON; defaults under the run root.")
+    import_catalog.add_argument("--run-id", default="catalog-import", help="Run identifier for artifact outputs.")
+    import_catalog.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    import_catalog.set_defaults(func=cmd_registry_import_catalog)
+
     doctor = subparsers.add_parser("doctor", help="Report core CLI readiness.")
     doctor.add_argument("--runtime", choices=("lifelib", "modelx", "julia", "r"), help="Optional runtime readiness check.")
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
@@ -73,6 +82,18 @@ def build_parser() -> argparse.ArgumentParser:
     chainladder.add_argument("--run-id", default="chainladder", help="Run identifier for the stdout envelope.")
     chainladder.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
     chainladder.set_defaults(func=cmd_reserve_chainladder)
+
+    faslr = reserve_sub.add_parser(
+        "faslr",
+        help="Catalog FASLR reserving workbench capabilities.",
+        description="Reference/catalog adapter for FASLR; not an executable reserving engine in v1.",
+    )
+    faslr.add_argument("--query", default="FASLR reserving workbench", help="Reference query label.")
+    faslr.add_argument("--output", help="Optional path for run_manifest JSON; defaults under the run root.")
+    faslr.add_argument("--diagnostics-output", help="Optional path for diagnostics JSON; defaults under the run root.")
+    faslr.add_argument("--run-id", default="faslr", help="Run identifier for artifact outputs.")
+    faslr.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    faslr.set_defaults(func=cmd_reserve_faslr)
 
     loss = subparsers.add_parser("loss", help="Run aggregate loss adapters.")
     loss_sub = loss.add_subparsers(dest="loss_command", required=True)
@@ -153,6 +174,22 @@ def build_parser() -> argparse.ArgumentParser:
     insurancerating.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
     insurancerating.set_defaults(func=cmd_pricing_insurancerating)
 
+    reference = subparsers.add_parser("reference", help="Search curated actuarial reference packs.")
+    reference_sub = reference.add_subparsers(dest="reference_command", required=True)
+    lda = reference_sub.add_parser("lda", help="Loss Data Analytics reference material.")
+    lda_sub = lda.add_subparsers(dest="lda_command", required=True)
+    lda_search = lda_sub.add_parser(
+        "search",
+        help="Create a Loss Data Analytics reference result artifact.",
+        description="Reference-only search adapter for Loss Data Analytics materials.",
+    )
+    lda_search.add_argument("--query", default="loss data analytics", help="Reference query label.")
+    lda_search.add_argument("--output", help="Optional path for reference_result JSON; defaults under the run root.")
+    lda_search.add_argument("--diagnostics-output", help="Optional path for diagnostics JSON; defaults under the run root.")
+    lda_search.add_argument("--run-id", default="lda-search", help="Run identifier for artifact outputs.")
+    lda_search.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    lda_search.set_defaults(func=cmd_reference_lda_search)
+
     return parser
 
 
@@ -188,6 +225,76 @@ def cmd_registry_validate(args: argparse.Namespace) -> int:
         for error in result.errors:
             print(f"{error.path} {error.json_path}: {error.message}", file=sys.stderr)
     return 0 if result.ok else 1
+
+
+def cmd_registry_import_catalog(args: argparse.Namespace) -> int:
+    from actuarial_cli_hub.adapters.reference import write_catalog_import_outputs
+
+    try:
+        payload = write_catalog_import_outputs(
+            query=args.query,
+            source_path=Path(args.source) if args.source else None,
+            output_path=Path(args.output) if args.output else None,
+            diagnostics_path=Path(args.diagnostics_output) if args.diagnostics_output else None,
+            run_id=args.run_id,
+        )
+    except (ValueError, OSError) as exc:
+        return _emit_reference_error(args, tool="actuarial.catalog.actuarial_foss", exc=exc)
+    return _emit_reference_payload(args, payload, label="catalog entries")
+
+
+def cmd_reserve_faslr(args: argparse.Namespace) -> int:
+    from actuarial_cli_hub.adapters.reference import write_faslr_catalog_outputs
+
+    try:
+        payload = write_faslr_catalog_outputs(
+            query=args.query,
+            output_path=Path(args.output) if args.output else None,
+            diagnostics_path=Path(args.diagnostics_output) if args.diagnostics_output else None,
+            run_id=args.run_id,
+        )
+    except (ValueError, OSError) as exc:
+        return _emit_reference_error(args, tool="actuarial.reserve.faslr", exc=exc)
+    return _emit_reference_payload(args, payload, label="FASLR capabilities")
+
+
+def cmd_reference_lda_search(args: argparse.Namespace) -> int:
+    from actuarial_cli_hub.adapters.reference import write_lda_search_outputs
+
+    try:
+        payload = write_lda_search_outputs(
+            query=args.query,
+            output_path=Path(args.output) if args.output else None,
+            diagnostics_path=Path(args.diagnostics_output) if args.diagnostics_output else None,
+            run_id=args.run_id,
+        )
+    except (ValueError, OSError) as exc:
+        return _emit_reference_error(args, tool="actuarial.reference.loss_data_analytics", exc=exc)
+    return _emit_reference_payload(args, payload, label="reference results")
+
+
+def _emit_reference_payload(args: argparse.Namespace, payload: dict[str, Any], *, label: str) -> int:
+    if args.json:
+        emit_json(payload)
+    else:
+        summary = payload["data"]["summary"]
+        print(f"{label}: {summary}")
+    return 0
+
+
+def _emit_reference_error(args: argparse.Namespace, *, tool: str, exc: ValueError) -> int:
+    payload = error_envelope(
+        tool=tool,
+        run_id=getattr(args, "run_id", "reference"),
+        code="invalid_input",
+        message=str(exc),
+        details={"run_id": getattr(args, "run_id", None)},
+    ).to_dict()
+    if args.json:
+        emit_json(payload)
+    else:
+        print(payload["error"]["message"], file=sys.stderr)
+    return 2
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:

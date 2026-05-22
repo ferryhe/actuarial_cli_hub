@@ -1,0 +1,41 @@
+source: actuarial-foss
+entries:
+  - id: chainladder-python
+    domain: reserving
+    conversion_class: python-library
+    recommended_status: implemented
+  - id: aggregate
+    domain: aggregate_loss
+    conversion_class: python-dsl
+    recommended_status: implemented
+  - id: cashflower
+    domain: cashflow
+    conversion_class: python-model-runner
+    recommended_status: implemented
+  - id: lifelib-modelx
+    domain: life_modeling
+    conversion_class: optional-python-runtime
+    recommended_status: boundary
+  - id: MortalityTables.jl
+    domain: mortality
+    conversion_class: optional-julia-runtime
+    recommended_status: boundary
+  - id: lifecontingencies
+    domain: lifecontingencies
+    conversion_class: optional-r-runtime
+    recommended_status: boundary
+  - id: insurancerating
+    domain: pricing
+    conversion_class: optional-r-runtime
+    recommended_status: boundary
+  - id: FASLR
+    domain: reserving
+    conversion_class: application-spike
+    recommended_status: cataloged
+  - id: Loss Data Analytics
+    domain: reference
+    conversion_class: reference-pack
+    recommended_status: external-reference
+limitations:
+  - Curated local seed snapshot; this command does not perform a live upstream scrape.
+  - Catalog entries require human license/runtime review before promotion.
