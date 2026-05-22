@@ -14,10 +14,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+aggregate = [
+  "aggregate>=0.30.1",
+]
 chainladder = [
   "chainladder>=0.9",
 ]
 dev = [
+  "aggregate>=0.30.1",
   "chainladder>=0.9",
   "pytest>=7.4",
 ]
