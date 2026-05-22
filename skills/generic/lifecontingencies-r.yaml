@@ -18,7 +18,6 @@ io:
   - deterministic_result
   - diagnostics
 agent:
-  skillPath: skills/hermes/life_contingencies/SKILL.md
   useCases:
   - Life contingency examples through R
   - Cross-runtime adapter validation

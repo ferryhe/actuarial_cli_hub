@@ -9,7 +9,7 @@ import yaml
 from actuarial_cli_hub.registry.loader import ToolManifest, load_manifests
 
 
-SUPPORTED_TARGETS = {"hermes", "generic", "ai_interface"}
+SUPPORTED_TARGETS = ("hermes", "generic", "ai_interface")
 
 
 @dataclass(frozen=True)
@@ -68,7 +68,7 @@ def _export_ai_interface(manifests: list[ToolManifest], output_dir: Path) -> lis
         "tools": [_generic_card(manifest) for manifest in manifests],
     }
     _write_yaml(path, payload)
-    return [ExportedSkill(target="ai_interface", tool_id="actuarial_cli_hub", path=path)]
+    return [ExportedSkill(target="ai_interface", tool_id=manifest.tool_id, path=path) for manifest in manifests]
 
 
 def _implemented_manifests(manifests: list[ToolManifest]) -> list[ToolManifest]:
@@ -120,6 +120,8 @@ def _generic_card(manifest: ToolManifest) -> dict[str, Any]:
     agent = dict(data["agent"])
     if manifest.runtime_availability == "implemented":
         agent["skillPath"] = f"skills/hermes/{_hermes_slug(manifest.tool_id)}/SKILL.md"
+    else:
+        agent.pop("skillPath", None)
     return {
         "schema_version": "actuarial-cli-tool-card.v1",
         "id": manifest.tool_id,

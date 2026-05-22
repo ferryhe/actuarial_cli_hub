@@ -18,7 +18,6 @@ io:
   - deterministic_result
   - diagnostics
 agent:
-  skillPath: skills/hermes/cashflow/SKILL.md
   useCases:
   - Cash-flow model demo runs
   - Agent-readable model output artifacts

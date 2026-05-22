@@ -19,7 +19,6 @@ io:
   - reference_result
   - diagnostics
 agent:
-  skillPath: skills/hermes/reference/SKILL.md
   useCases:
   - Educational reference lookup
   - Dataset/notebook cataloging

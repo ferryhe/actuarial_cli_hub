@@ -24,7 +24,6 @@ tools:
     - run_manifest
     - diagnostics
   agent:
-    skillPath: skills/hermes/catalog/SKILL.md
     useCases:
     - Discover actuarial OSS candidates
     - Seed future registry entries
@@ -91,7 +90,6 @@ tools:
     - deterministic_result
     - diagnostics
   agent:
-    skillPath: skills/hermes/cashflow/SKILL.md
     useCases:
     - Cash-flow model demo runs
     - Agent-readable model output artifacts
@@ -159,7 +157,6 @@ tools:
     - diagnostics
     - run_manifest
   agent:
-    skillPath: skills/hermes/reserving/SKILL.md
     useCases:
     - Catalog reserving workbench capabilities
     - Spike possible public calculation APIs
@@ -192,7 +189,6 @@ tools:
     - deterministic_result
     - diagnostics
   agent:
-    skillPath: skills/hermes/pricing/SKILL.md
     useCases:
     - Pricing/rating examples
     - R adapter contract validation
@@ -225,7 +221,6 @@ tools:
     - deterministic_result
     - diagnostics
   agent:
-    skillPath: skills/hermes/life_contingencies/SKILL.md
     useCases:
     - Life contingency examples through R
     - Cross-runtime adapter validation
@@ -259,7 +254,6 @@ tools:
     - diagnostics
     - run_manifest
   agent:
-    skillPath: skills/hermes/life_modeling/SKILL.md
     useCases:
     - Life model template experiments
     - IFRS 17 style educational workflows
@@ -293,7 +287,6 @@ tools:
     - reference_result
     - diagnostics
   agent:
-    skillPath: skills/hermes/reference/SKILL.md
     useCases:
     - Educational reference lookup
     - Dataset/notebook cataloging
@@ -326,7 +319,6 @@ tools:
     artifacts:
     - diagnostics
   agent:
-    skillPath: skills/hermes/life_modeling/SKILL.md
     useCases:
     - Readiness checks for modelx-backed life models
     limitations:
@@ -358,7 +350,6 @@ tools:
     - mortality_result
     - diagnostics
   agent:
-    skillPath: skills/hermes/mortality/SKILL.md
     useCases:
     - Mortality table lookup experiments
     - Life-contingency teaching examples

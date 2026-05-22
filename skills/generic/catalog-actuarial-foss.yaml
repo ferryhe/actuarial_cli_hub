@@ -18,7 +18,6 @@ io:
   - run_manifest
   - diagnostics
 agent:
-  skillPath: skills/hermes/catalog/SKILL.md
   useCases:
   - Discover actuarial OSS candidates
   - Seed future registry entries

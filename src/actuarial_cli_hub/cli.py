@@ -11,6 +11,7 @@ from actuarial_cli_hub import __version__
 from actuarial_cli_hub.registry.loader import load_manifests
 from actuarial_cli_hub.registry.validator import validate_registry
 from actuarial_cli_hub.runtime.envelope import error_envelope, success_envelope
+from actuarial_cli_hub.skills.generator import SUPPORTED_TARGETS
 
 
 def emit_json(payload: dict[str, Any]) -> None:
@@ -46,7 +47,7 @@ def build_parser() -> argparse.ArgumentParser:
     skills_export = skills_sub.add_parser("export", help="Generate skill/tool-card files from registry metadata.")
     skills_export.add_argument(
         "--target",
-        choices=("hermes", "generic", "ai_interface"),
+        choices=SUPPORTED_TARGETS,
         default="generic",
         help="Export format to generate.",
     )
@@ -171,12 +172,16 @@ def cmd_skills_export(args: argparse.Namespace) -> int:
             print(str(exc), file=sys.stderr)
         return 2
 
+    files = sorted({str(item.path) for item in exported})
+    tools = [item.tool_id for item in exported]
     data = {
         "target": args.target,
         "output_dir": str(Path(args.output_dir)),
         "count": len(exported),
-        "files": [str(item.path) for item in exported],
-        "tools": [item.tool_id for item in exported],
+        "tool_count": len(tools),
+        "file_count": len(files),
+        "files": files,
+        "tools": tools,
     }
     payload = success_envelope(tool="actuarial_cli_hub.skills.export", run_id="skills-export", data=data).to_dict()
     if args.json:

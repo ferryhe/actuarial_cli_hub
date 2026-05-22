@@ -18,7 +18,6 @@ io:
   artifacts:
   - diagnostics
 agent:
-  skillPath: skills/hermes/life_modeling/SKILL.md
   useCases:
   - Readiness checks for modelx-backed life models
   limitations:

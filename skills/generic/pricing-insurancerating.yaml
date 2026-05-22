@@ -18,7 +18,6 @@ io:
   - deterministic_result
   - diagnostics
 agent:
-  skillPath: skills/hermes/pricing/SKILL.md
   useCases:
   - Pricing/rating examples
   - R adapter contract validation

@@ -18,7 +18,6 @@ io:
   - mortality_result
   - diagnostics
 agent:
-  skillPath: skills/hermes/mortality/SKILL.md
   useCases:
   - Mortality table lookup experiments
   - Life-contingency teaching examples

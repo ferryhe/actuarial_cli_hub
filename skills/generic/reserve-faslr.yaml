@@ -18,7 +18,6 @@ io:
   - diagnostics
   - run_manifest
 agent:
-  skillPath: skills/hermes/reserving/SKILL.md
   useCases:
   - Catalog reserving workbench capabilities
   - Spike possible public calculation APIs

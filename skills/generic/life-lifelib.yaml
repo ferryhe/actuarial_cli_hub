@@ -19,7 +19,6 @@ io:
   - diagnostics
   - run_manifest
 agent:
-  skillPath: skills/hermes/life_modeling/SKILL.md
   useCases:
   - Life model template experiments
   - IFRS 17 style educational workflows

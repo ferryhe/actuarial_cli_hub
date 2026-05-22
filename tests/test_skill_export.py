@@ -65,4 +65,33 @@ def test_skills_export_cli_json_envelope(tmp_path: Path) -> None:
     payload = json.loads(completed.stdout)
     assert payload["status"] == "success"
     assert payload["data"]["target"] == "generic"
+    assert payload["data"]["file_count"] == payload["data"]["tool_count"] == payload["data"]["count"]
     assert (output_dir / "loss-aggregate.yaml").is_file()
+
+
+def test_ai_interface_export_cli_reports_one_file_with_many_tools(tmp_path: Path) -> None:
+    output_dir = tmp_path / "ai-preview"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER),
+            "skills",
+            "export",
+            "--target",
+            "ai_interface",
+            "--output",
+            str(output_dir),
+            "--json",
+        ],
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+
+    payload = json.loads(completed.stdout)
+    assert payload["status"] == "success"
+    assert payload["data"]["target"] == "ai_interface"
+    assert payload["data"]["file_count"] == 1
+    assert payload["data"]["tool_count"] == payload["data"]["count"]
+    assert "actuarial.loss.aggregate" in payload["data"]["tools"]
+    assert (output_dir / "actuarial_cli_hub" / "skill.yaml").is_file()
