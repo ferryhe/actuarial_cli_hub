@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -17,7 +18,7 @@ def test_mortality_table_boundary_runs_with_julia_runtime_when_present() -> None
     _runtime_or_skip("julia")
 
     result = subprocess.run(
-        ["python", "scripts/run_actuarial_cli.py", "mortality", "table", "--json"],
+        [sys.executable, "scripts/run_actuarial_cli.py", "mortality", "table", "--json"],
         check=False,
         text=True,
         capture_output=True,
@@ -32,7 +33,7 @@ def test_lifecontingencies_boundary_runs_with_r_runtime_when_present() -> None:
     _runtime_or_skip("Rscript")
 
     result = subprocess.run(
-        ["python", "scripts/run_actuarial_cli.py", "lifecontingencies", "r", "--json"],
+        [sys.executable, "scripts/run_actuarial_cli.py", "lifecontingencies", "r", "--json"],
         check=False,
         text=True,
         capture_output=True,
