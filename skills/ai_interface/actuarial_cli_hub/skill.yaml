@@ -73,11 +73,11 @@ tools:
 - schema_version: actuarial-cli-tool-card.v1
   id: actuarial.cashflow.cashflower
   name: Cashflower Cash-flow Runner
-  status: cataloged
+  status: experimental
   priority: P1
   runtime:
     kind: cli
-    availability: planned
+    availability: implemented
     command:
     - actuary
     - cashflow
@@ -90,12 +90,14 @@ tools:
     - deterministic_result
     - diagnostics
   agent:
+    skillPath: skills/hermes/cashflow-cashflower/SKILL.md
     useCases:
     - Cash-flow model demo runs
     - Agent-readable model output artifacts
     limitations:
     - Model code is user supplied and must be reviewed
-    - Wrapper is not implemented until P1 runtime PR
+    - Wrapper runs user supplied model.py files in an isolated temporary directory
+      but does not sandbox arbitrary Python code
   upstream:
     repo: https://github.com/acturtle/cashflower
     package: cashflower

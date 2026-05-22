@@ -90,6 +90,21 @@ def build_parser() -> argparse.ArgumentParser:
     aggregate.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
     aggregate.set_defaults(func=cmd_loss_aggregate)
 
+    cashflow = subparsers.add_parser("cashflow", help="Run cash-flow/model-runner adapters.")
+    cashflow_sub = cashflow.add_subparsers(dest="cashflow_command", required=True)
+    cashflower = cashflow_sub.add_parser(
+        "cashflower",
+        help="Run a cashflower model.py with YAML assumptions.",
+        description="Run a cashflower model.py with generated input.py from YAML assumptions.",
+    )
+    cashflower.add_argument("--model", required=True, help="Path to a cashflower model.py file.")
+    cashflower.add_argument("--assumptions", required=True, help="YAML assumptions/settings for the model run.")
+    cashflower.add_argument("--output", required=True, help="Path for deterministic_result JSON.")
+    cashflower.add_argument("--diagnostics-output", help="Optional path for diagnostics JSON; defaults beside --output.")
+    cashflower.add_argument("--run-id", default="cashflower", help="Run identifier for the stdout envelope.")
+    cashflower.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    cashflower.set_defaults(func=cmd_cashflow_cashflower)
+
     return parser
 
 
@@ -315,6 +330,72 @@ def cmd_loss_aggregate(args: argparse.Namespace) -> int:
             "aggregate expected_loss="
             f"{summary['expected_loss']} cv={summary['coefficient_of_variation']}"
         )
+    return 0
+
+def cmd_cashflow_cashflower(args: argparse.Namespace) -> int:
+    try:
+        from actuarial_cli_hub.adapters.cashflower import write_cashflower_outputs
+
+        payload = write_cashflower_outputs(
+            model_path=Path(args.model),
+            assumptions_path=Path(args.assumptions),
+            output_path=Path(args.output),
+            diagnostics_path=Path(args.diagnostics_output) if args.diagnostics_output else None,
+            run_id=args.run_id,
+        )
+    except ModuleNotFoundError as exc:
+        if exc.name in {"cashflower", "pandas", "numpy", "networkx", "yaml"}:
+            payload = error_envelope(
+                tool="actuarial.cashflow.cashflower",
+                run_id=args.run_id,
+                code="runtime_missing",
+                message="The cashflower runtime is not installed. Install with: pip install 'actuarial-cli-hub[cashflower]'",
+                details={"missing_module": exc.name},
+            ).to_dict()
+        else:
+            payload = error_envelope(
+                tool="actuarial.cashflow.cashflower",
+                run_id=args.run_id,
+                code="upstream_failure",
+                message=f"cashflower model dependency is missing: {exc.name}",
+                details={"missing_module": exc.name, "model": args.model, "assumptions": args.assumptions},
+            ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(payload["error"]["message"], file=sys.stderr)
+        return 2
+    except (ValueError, OSError) as exc:
+        payload = error_envelope(
+            tool="actuarial.cashflow.cashflower",
+            run_id=args.run_id,
+            code="invalid_input",
+            message=str(exc),
+            details={"model": args.model, "assumptions": args.assumptions},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(str(exc), file=sys.stderr)
+        return 2
+    except Exception as exc:
+        payload = error_envelope(
+            tool="actuarial.cashflow.cashflower",
+            run_id=args.run_id,
+            code="upstream_failure",
+            message=f"cashflower runtime failed: {exc}",
+            details={"model": args.model, "assumptions": args.assumptions},
+        ).to_dict()
+        if args.json:
+            emit_json(payload)
+        else:
+            print(payload["error"]["message"], file=sys.stderr)
+        return 2
+    if args.json:
+        emit_json(payload)
+    else:
+        summary = payload["data"]["summary"]
+        print(f"cashflower rows={payload['data']['row_count']} final_t={summary['final_t']}")
     return 0
 
 

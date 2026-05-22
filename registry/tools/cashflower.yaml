@@ -1,7 +1,7 @@
 id: actuarial.cashflow.cashflower
 version: actuarial-cashflow.v1
 name: Cashflower Cash-flow Runner
-status: cataloged
+status: experimental
 category: cashflow
 priority: P1
 upstream:
@@ -14,14 +14,14 @@ conversion:
   class: python-model-runner
   form: model-run wrapper for cash-flow models and assumptions
   dependencyWeight: medium
-  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+  readiness: Runtime wrapper, YAML assumptions fixture, JSON envelope behavior, and focused tests are implemented.
 runtime:
   kind: cli
   command:
     - actuary
     - cashflow
     - cashflower
-  availability: planned
+  availability: implemented
   allowedCommandPrefix: actuary cashflow cashflower
   timeoutMs: 300000
   maxOutputBytes: 1048576
@@ -32,10 +32,10 @@ io:
     - deterministic_result
     - diagnostics
 agent:
-  skillPath: skills/hermes/cashflow/SKILL.md
+  skillPath: skills/hermes/cashflow-cashflower/SKILL.md
   useCases:
     - Cash-flow model demo runs
     - Agent-readable model output artifacts
   limitations:
     - Model code is user supplied and must be reviewed
-    - Wrapper is not implemented until P1 runtime PR
+    - Wrapper runs user supplied model.py files in an isolated temporary directory but does not sandbox arbitrary Python code
