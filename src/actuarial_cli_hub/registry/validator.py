@@ -8,7 +8,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from .loader import ToolManifest, load_manifest, manifest_paths, schema_path
+from .loader import ToolManifest, load_manifest, manifest_paths, schema_path, tools_dir
 
 
 @dataclass(frozen=True)
@@ -58,9 +58,24 @@ def validate_manifest(manifest: ToolManifest, schema: dict[str, Any]) -> list[Re
 
 
 def validate_registry(root: Path | None = None) -> RegistryValidationResult:
-    schema = load_schema(root)
     errors: list[RegistryValidationError] = []
     paths = manifest_paths(root)
+    if not paths:
+        return RegistryValidationResult(
+            ok=False,
+            manifest_count=0,
+            errors=[RegistryValidationError(path=str(tools_dir(root)), message="No registry manifests found", json_path="$")],
+        )
+
+    try:
+        schema = load_schema(root)
+    except Exception as exc:
+        return RegistryValidationResult(
+            ok=False,
+            manifest_count=len(paths),
+            errors=[RegistryValidationError(path=str(schema_path(root)), message=str(exc), json_path="$")],
+        )
+
     for path in paths:
         try:
             manifest = load_manifest(path)

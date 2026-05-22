@@ -22,6 +22,13 @@ def test_success_envelope_contract() -> None:
     assert "error" not in envelope
 
 
+def test_success_envelope_can_omit_data() -> None:
+    envelope = success_envelope(tool="actuarial.test", run_id="demo").to_dict()
+
+    assert envelope["status"] == "success"
+    assert "data" not in envelope
+
+
 def test_error_envelope_contract() -> None:
     envelope = error_envelope(
         tool="actuarial.test",

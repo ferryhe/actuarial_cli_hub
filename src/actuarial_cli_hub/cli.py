@@ -26,7 +26,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
 
     registry = subparsers.add_parser("registry", help="Inspect and validate tool manifests.")
-    registry_sub = registry.add_subparsers(dest="registry_command")
+    registry_sub = registry.add_subparsers(dest="registry_command", required=True)
 
     registry_list = registry_sub.add_parser("list", help="List registered actuarial tools.")
     registry_list.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")

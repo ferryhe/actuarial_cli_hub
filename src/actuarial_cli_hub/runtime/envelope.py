@@ -53,7 +53,7 @@ def success_envelope(
         tool=tool,
         run_id=run_id,
         created_at=utc_now_iso(),
-        data=data or {},
+        data=data,
         artifacts=artifacts or [],
     )
 
