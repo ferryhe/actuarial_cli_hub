@@ -12,6 +12,8 @@ from actuarial_cli_hub import __version__
 from actuarial_cli_hub.registry.loader import load_manifests
 from actuarial_cli_hub.registry.validator import validate_registry
 from actuarial_cli_hub.runtime.envelope import error_envelope, success_envelope
+from actuarial_cli_hub.runtimes.julia import check_julia_runtime
+from actuarial_cli_hub.runtimes.r import check_r_runtime
 from actuarial_cli_hub.skills.generator import SUPPORTED_TARGETS
 
 
@@ -40,7 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     registry_validate.set_defaults(func=cmd_registry_validate)
 
     doctor = subparsers.add_parser("doctor", help="Report core CLI readiness.")
-    doctor.add_argument("--runtime", choices=("lifelib", "modelx"), help="Optional runtime readiness check.")
+    doctor.add_argument("--runtime", choices=("lifelib", "modelx", "julia", "r"), help="Optional runtime readiness check.")
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     doctor.set_defaults(func=cmd_doctor)
 
@@ -198,12 +200,16 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 
 def cmd_runtime_doctor(args: argparse.Namespace, registry_ok: bool) -> int:
-    packages, missing = _runtime_packages(args.runtime)
+    runtime_status = _optional_runtime_status(args.runtime)
+    packages = runtime_status["packages"]
+    missing = runtime_status["missing"]
+    unavailable = runtime_status["unavailable"]
     data = {
         "runtime": args.runtime,
         "packages": {name: name not in missing for name in packages},
-        "available": not missing,
+        "available": not missing and not unavailable,
         "registry_ok": registry_ok,
+        **runtime_status["details"],
     }
     if not registry_ok:
         payload = error_envelope(
@@ -223,6 +229,15 @@ def cmd_runtime_doctor(args: argparse.Namespace, registry_ok: bool) -> int:
             details=data,
         ).to_dict()
         exit_code = 2
+    elif unavailable:
+        payload = error_envelope(
+            tool=f"actuarial_cli_hub.doctor.{args.runtime}",
+            run_id=f"doctor-{args.runtime}",
+            code="runtime_unavailable",
+            message=f"Optional runtime was found but failed readiness checks: {', '.join(unavailable)}",
+            details=data,
+        ).to_dict()
+        exit_code = 2
     else:
         payload = success_envelope(tool=f"actuarial_cli_hub.doctor.{args.runtime}", run_id=f"doctor-{args.runtime}", data=data).to_dict()
         exit_code = 0
@@ -237,6 +252,26 @@ def _runtime_packages(runtime: str) -> tuple[list[str], list[str]]:
     packages = ["lifelib", "modelx"] if runtime == "lifelib" else [runtime]
     missing = [name for name in packages if importlib.util.find_spec(name) is None]
     return packages, missing
+
+
+def _optional_runtime_status(runtime: str) -> dict[str, Any]:
+    if runtime in {"lifelib", "modelx"}:
+        packages, missing = _runtime_packages(runtime)
+        return {"packages": packages, "missing": missing, "unavailable": [], "details": {}}
+    if runtime == "julia":
+        status = check_julia_runtime()
+    elif runtime == "r":
+        status = check_r_runtime()
+    else:  # argparse normally prevents this, but keep direct calls bounded.
+        raise ValueError(f"Unsupported runtime: {runtime}")
+    missing = [status.command] if status.executable is None else []
+    unavailable = [status.command] if status.executable is not None and not status.available else []
+    return {
+        "packages": [status.command],
+        "missing": missing,
+        "unavailable": unavailable,
+        "details": {"runtime_status": status.to_dict()},
+    }
 
 
 def cmd_skills_export(args: argparse.Namespace) -> int:
