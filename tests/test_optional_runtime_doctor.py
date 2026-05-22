@@ -56,6 +56,31 @@ def test_r_doctor_reports_available_runtime(monkeypatch, capsys) -> None:
     assert payload["data"]["runtime_status"]["version"] == "Rscript 4.4.0"
 
 
+def test_r_doctor_reports_unavailable_when_version_probe_fails(monkeypatch, capsys) -> None:
+    from actuarial_cli_hub import cli
+
+    monkeypatch.setattr(
+        cli,
+        "check_r_runtime",
+        lambda: RuntimeStatus(
+            runtime="r",
+            command="Rscript",
+            executable="/usr/bin/Rscript",
+            available=False,
+            error="version command exited 1",
+        ),
+    )
+
+    exit_code = cli.cmd_runtime_doctor(argparse.Namespace(runtime="r", json=True), registry_ok=True)
+    payload = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 2
+    assert payload["error"]["code"] == "runtime_unavailable"
+    assert payload["error"]["details"]["packages"] == {"Rscript": True}
+    assert payload["error"]["details"]["available"] is False
+    assert payload["error"]["details"]["runtime_status"]["error"] == "version command exited 1"
+
+
 def test_runtime_doctor_help_lists_cross_runtime_choices() -> None:
     parser = __import__("actuarial_cli_hub.cli", fromlist=["build_parser"]).build_parser()
 

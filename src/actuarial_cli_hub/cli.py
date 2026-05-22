@@ -203,10 +203,11 @@ def cmd_runtime_doctor(args: argparse.Namespace, registry_ok: bool) -> int:
     runtime_status = _optional_runtime_status(args.runtime)
     packages = runtime_status["packages"]
     missing = runtime_status["missing"]
+    unavailable = runtime_status["unavailable"]
     data = {
         "runtime": args.runtime,
         "packages": {name: name not in missing for name in packages},
-        "available": not missing,
+        "available": not missing and not unavailable,
         "registry_ok": registry_ok,
         **runtime_status["details"],
     }
@@ -225,6 +226,15 @@ def cmd_runtime_doctor(args: argparse.Namespace, registry_ok: bool) -> int:
             run_id=f"doctor-{args.runtime}",
             code="runtime_missing",
             message=f"Optional runtime is not installed: {', '.join(missing)}",
+            details=data,
+        ).to_dict()
+        exit_code = 2
+    elif unavailable:
+        payload = error_envelope(
+            tool=f"actuarial_cli_hub.doctor.{args.runtime}",
+            run_id=f"doctor-{args.runtime}",
+            code="runtime_unavailable",
+            message=f"Optional runtime was found but failed readiness checks: {', '.join(unavailable)}",
             details=data,
         ).to_dict()
         exit_code = 2
@@ -247,15 +257,21 @@ def _runtime_packages(runtime: str) -> tuple[list[str], list[str]]:
 def _optional_runtime_status(runtime: str) -> dict[str, Any]:
     if runtime in {"lifelib", "modelx"}:
         packages, missing = _runtime_packages(runtime)
-        return {"packages": packages, "missing": missing, "details": {}}
+        return {"packages": packages, "missing": missing, "unavailable": [], "details": {}}
     if runtime == "julia":
         status = check_julia_runtime()
     elif runtime == "r":
         status = check_r_runtime()
     else:  # argparse normally prevents this, but keep direct calls bounded.
         raise ValueError(f"Unsupported runtime: {runtime}")
-    missing = [] if status.available else [status.command]
-    return {"packages": [status.command], "missing": missing, "details": {"runtime_status": status.to_dict()}}
+    missing = [status.command] if status.executable is None else []
+    unavailable = [status.command] if status.executable is not None and not status.available else []
+    return {
+        "packages": [status.command],
+        "missing": missing,
+        "unavailable": unavailable,
+        "details": {"runtime_status": status.to_dict()},
+    }
 
 
 def cmd_skills_export(args: argparse.Namespace) -> int:
