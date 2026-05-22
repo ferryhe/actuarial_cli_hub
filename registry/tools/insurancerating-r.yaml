@@ -21,6 +21,7 @@ runtime:
     - actuary
     - pricing
     - insurancerating
+  availability: planned
   allowedCommandPrefix: actuary pricing insurancerating
   timeoutMs: 300000
   maxOutputBytes: 1048576

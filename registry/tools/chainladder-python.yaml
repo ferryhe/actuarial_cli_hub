@@ -21,6 +21,7 @@ runtime:
     - actuary
     - reserve
     - chainladder
+  availability: planned
   allowedCommandPrefix: actuary reserve chainladder
   timeoutMs: 300000
   maxOutputBytes: 1048576

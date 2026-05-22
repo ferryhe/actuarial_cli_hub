@@ -21,6 +21,7 @@ runtime:
     - actuary
     - life
     - lifelib
+  availability: planned
   allowedCommandPrefix: actuary life lifelib
   timeoutMs: 300000
   maxOutputBytes: 1048576

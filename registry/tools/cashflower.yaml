@@ -21,6 +21,7 @@ runtime:
     - actuary
     - cashflow
     - cashflower
+  availability: planned
   allowedCommandPrefix: actuary cashflow cashflower
   timeoutMs: 300000
   maxOutputBytes: 1048576

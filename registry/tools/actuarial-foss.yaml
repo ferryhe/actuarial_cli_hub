@@ -21,6 +21,7 @@ runtime:
     - actuary
     - registry
     - import-catalog
+  availability: planned
   allowedCommandPrefix: actuary registry import-catalog
   timeoutMs: 300000
   maxOutputBytes: 1048576

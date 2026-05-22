@@ -21,6 +21,7 @@ runtime:
     - actuary
     - mortality
     - table
+  availability: planned
   allowedCommandPrefix: actuary mortality table
   timeoutMs: 300000
   maxOutputBytes: 1048576

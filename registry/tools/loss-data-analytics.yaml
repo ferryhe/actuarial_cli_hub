@@ -22,6 +22,7 @@ runtime:
     - reference
     - lda
     - search
+  availability: planned
   allowedCommandPrefix: actuary reference lda search
   timeoutMs: 300000
   maxOutputBytes: 1048576

@@ -3,7 +3,7 @@
   "$id": "https://github.com/ferryhe/actuarial_cli_hub/registry/schemas/tool-manifest.schema.json",
   "title": "Actuarial CLI Hub Tool Manifest",
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "required": ["id", "version", "name", "status", "category", "priority", "upstream", "conversion", "runtime", "io", "agent"],
   "properties": {
     "id": {"type": "string", "pattern": "^actuarial\\.[a-z0-9_.-]+$"},
@@ -14,6 +14,7 @@
     "priority": {"enum": ["P0", "P1", "P1/P2", "P2", "P3", "P0/P1"]},
     "upstream": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["repo", "language"],
       "properties": {
         "repo": {"type": "string"},
@@ -25,6 +26,7 @@
     },
     "conversion": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["class", "form", "dependencyWeight"],
       "properties": {
         "class": {"enum": ["python-library", "python-dsl", "python-model-runner", "julia-adapter", "r-adapter", "application-spike", "reference-pack", "catalog-importer"]},
@@ -35,10 +37,12 @@
     },
     "runtime": {
       "type": "object",
-      "required": ["kind", "command", "allowedCommandPrefix"],
+      "additionalProperties": false,
+      "required": ["kind", "command", "availability", "allowedCommandPrefix"],
       "properties": {
         "kind": {"enum": ["cli", "optional-cli", "reference", "catalog"]},
         "command": {"type": "array", "items": {"type": "string"}},
+        "availability": {"enum": ["planned", "implemented", "external"]},
         "allowedCommandPrefix": {"type": "string"},
         "timeoutMs": {"type": "integer", "minimum": 1000},
         "maxOutputBytes": {"type": "integer", "minimum": 1024}
@@ -46,6 +50,7 @@
     },
     "io": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["inputSchema", "outputSchema", "artifacts"],
       "properties": {
         "inputSchema": {"type": "string"},
@@ -55,6 +60,7 @@
     },
     "agent": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["useCases", "limitations"],
       "properties": {
         "skillPath": {"type": "string"},

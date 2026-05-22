@@ -21,6 +21,7 @@ runtime:
     - actuary
     - loss
     - aggregate
+  availability: planned
   allowedCommandPrefix: actuary loss aggregate
   timeoutMs: 300000
   maxOutputBytes: 1048576

@@ -21,6 +21,7 @@ runtime:
     - actuary
     - lifecontingencies
     - r
+  availability: planned
   allowedCommandPrefix: actuary lifecontingencies r
   timeoutMs: 300000
   maxOutputBytes: 1048576

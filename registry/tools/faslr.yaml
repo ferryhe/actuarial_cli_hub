@@ -21,6 +21,7 @@ runtime:
     - actuary
     - reserve
     - faslr
+  availability: planned
   allowedCommandPrefix: actuary reserve faslr
   timeoutMs: 300000
   maxOutputBytes: 1048576

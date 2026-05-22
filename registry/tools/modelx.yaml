@@ -22,6 +22,7 @@ runtime:
     - doctor
     - --runtime
     - modelx
+  availability: planned
   allowedCommandPrefix: actuary doctor --runtime modelx
   timeoutMs: 300000
   maxOutputBytes: 1048576
