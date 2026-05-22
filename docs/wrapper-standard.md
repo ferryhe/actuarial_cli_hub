@@ -2,6 +2,8 @@
 
 Every executable wrapper follows the same minimal factory. The goal is boring, inspectable, agent-safe execution rather than clever auto-conversion.
 
+For the step-by-step workflow, see [`add-a-wrapper.md`](add-a-wrapper.md). For pre-release gates, see [`release-checklist.md`](release-checklist.md).
+
 ## Conversion steps
 
 1. Discover public README, examples, tests, package metadata, licenses, and runtime constraints.

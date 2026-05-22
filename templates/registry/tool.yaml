@@ -1,0 +1,32 @@
+id: actuarial.<domain>.<tool>
+version: actuarial-<tool>.v1
+name: <Human Tool Name>
+status: cataloged
+priority: P3
+category: <domain>
+upstream:
+  repo: https://github.com/<owner>/<repo>
+  package: <package-or-project-name>
+  language: python
+runtime:
+  kind: cli
+  availability: planned
+  command:
+    - actuary
+    - <domain>
+    - <tool>
+  allowedCommandPrefix: actuary <domain> <tool>
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/<input-schema>.schema.json
+  outputSchema: registry/schemas/<output-schema>.schema.json
+  artifacts:
+    - deterministic_result
+    - diagnostics
+agent:
+  useCases:
+    - Replace with the narrow actuarial task this wrapper supports.
+  limitations:
+    - Replace with known actuarial, runtime, and data-quality limitations.
+    - Outputs require qualified actuarial review before business use.
