@@ -770,15 +770,17 @@ python scripts/run_actuarial_cli.py reference lda search \
 ```bash
 python -m json.tool registry/schemas/tool-manifest.schema.json >/dev/null
 python - <<'PY'
-import pathlib, yaml
+import json, pathlib, yaml
+from jsonschema import Draft202012Validator
+schema = json.loads(pathlib.Path('registry/schemas/tool-manifest.schema.json').read_text())
+validator = Draft202012Validator(schema)
 paths = sorted(pathlib.Path('registry/tools').glob('*.yaml'))
 assert len(paths) >= 10, paths
 for path in paths:
     data = yaml.safe_load(path.read_text())
-    assert data['id']
-    assert data['status'] in {'cataloged','manifested','fixture-ready','experimental','stable','external-reference'}
-    assert data['conversion']['class'] in {'python-library','python-dsl','python-model-runner','julia-adapter','r-adapter','application-spike','reference-pack','catalog-importer'}
-print('catalog smoke ok')
+    errors = sorted(validator.iter_errors(data), key=lambda err: list(err.path))
+    assert not errors, (path, [error.message for error in errors])
+print('catalog schema validation ok')
 PY
 git diff --check
 ```

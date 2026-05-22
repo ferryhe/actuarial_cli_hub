@@ -1,0 +1,41 @@
+id: actuarial.pricing.insurancerating
+version: actuarial-pricing.v1
+name: R insurancerating
+status: cataloged
+category: pricing
+priority: P2
+upstream:
+  repo: https://cran.r-project.org/package=insurancerating
+  package: insurancerating
+  language: r
+  license: GPL-2/GPL-3
+  install: Rscript install.packages("insurancerating")
+conversion:
+  class: r-adapter
+  form: optional Rscript JSON bridge for pricing/rating examples
+  dependencyWeight: optional
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: optional-cli
+  command:
+    - actuary
+    - pricing
+    - insurancerating
+  availability: planned
+  allowedCommandPrefix: actuary pricing insurancerating
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+    - deterministic_result
+    - diagnostics
+agent:
+  skillPath: skills/hermes/pricing/SKILL.md
+  useCases:
+    - Pricing/rating examples
+    - R adapter contract validation
+  limitations:
+    - Requires R runtime when executed
+    - No production pricing claim

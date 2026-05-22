@@ -1,0 +1,43 @@
+id: actuarial.reserve.chainladder
+version: actuarial-reserving.v1
+name: Chainladder Reserving
+status: manifested
+category: reserving
+priority: P0
+upstream:
+  repo: https://github.com/casact/chainladder-python
+  package: chainladder
+  language: python
+  license: BSD-3-Clause
+  install: 'pip install chainladder'
+conversion:
+  class: python-library
+  form: full wrapper around public chainladder reserving APIs
+  dependencyWeight: medium
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: cli
+  command:
+    - actuary
+    - reserve
+    - chainladder
+  availability: planned
+  allowedCommandPrefix: actuary reserve chainladder
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/reserving-triangle.schema.json
+  outputSchema: registry/schemas/reserving-result.schema.json
+  artifacts:
+    - deterministic_result
+    - diagnostics
+    - explanation_markdown
+agent:
+  skillPath: skills/hermes/reserving/SKILL.md
+  useCases:
+    - P&C loss reserving methodology validation
+    - triangle diagnostics
+    - reserving demo or teaching workflow
+  limitations:
+    - Not a regulatory-production reserving system
+    - Requires actuarial review before business use

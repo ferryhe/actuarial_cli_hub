@@ -1,0 +1,42 @@
+id: actuarial.loss.aggregate
+version: actuarial-aggregate-loss.v1
+name: Aggregate Loss
+status: manifested
+category: aggregate_loss
+priority: P0
+upstream:
+  repo: https://github.com/mynl/aggregate
+  package: aggregate
+  language: python
+  license: BSD-3-Clause
+  install: 'pip install aggregate'
+conversion:
+  class: python-dsl
+  form: full wrapper around aggregate DSL declarations
+  dependencyWeight: medium
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: cli
+  command:
+    - actuary
+    - loss
+    - aggregate
+  availability: planned
+  allowedCommandPrefix: actuary loss aggregate
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/aggregate-loss-input.schema.json
+  outputSchema: registry/schemas/aggregate-loss-result.schema.json
+  artifacts:
+    - aggregate_result
+    - diagnostics
+    - explanation_markdown
+agent:
+  skillPath: skills/hermes/aggregate_loss/SKILL.md
+  useCases:
+    - Aggregate loss and risk examples
+    - Teaching collective risk model workflows
+  limitations:
+    - DSL declarations must be reviewed by a qualified actuary
+    - Runtime availability is verified in a later wrapper PR

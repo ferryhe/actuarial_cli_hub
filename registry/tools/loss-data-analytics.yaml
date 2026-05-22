@@ -1,0 +1,42 @@
+id: actuarial.reference.loss_data_analytics
+version: actuarial-reference.v1
+name: Loss Data Analytics Materials
+status: external-reference
+category: reference
+priority: P3
+upstream:
+  repo: https://openacttexts.github.io/Loss-Data-Analytics/
+  package: loss-data-analytics
+  language: reference
+  license: CC-BY-NC-SA
+  install: 'not applicable'
+conversion:
+  class: reference-pack
+  form: reference/data pack rather than calculation wrapper
+  dependencyWeight: reference-only
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: reference
+  command:
+    - actuary
+    - reference
+    - lda
+    - search
+  availability: planned
+  allowedCommandPrefix: actuary reference lda search
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/reference-query.schema.json
+  outputSchema: registry/schemas/reference-result.schema.json
+  artifacts:
+    - reference_result
+    - diagnostics
+agent:
+  skillPath: skills/hermes/reference/SKILL.md
+  useCases:
+    - Educational reference lookup
+    - Dataset/notebook cataloging
+  limitations:
+    - Not an executable actuarial calculation engine
+    - Reference material may require citation and human interpretation

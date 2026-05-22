@@ -1,0 +1,41 @@
+id: actuarial.mortality.tables_jl
+version: actuarial-mortality.v1
+name: MortalityTables.jl
+status: cataloged
+category: mortality
+priority: P2
+upstream:
+  repo: https://github.com/JuliaActuary/MortalityTables.jl
+  package: MortalityTables.jl
+  language: julia
+  license: MIT
+  install: 'julia package installation via Pkg'
+conversion:
+  class: julia-adapter
+  form: optional Julia JSON bridge for mortality tables
+  dependencyWeight: optional
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: optional-cli
+  command:
+    - actuary
+    - mortality
+    - table
+  availability: planned
+  allowedCommandPrefix: actuary mortality table
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+    - mortality_result
+    - diagnostics
+agent:
+  skillPath: skills/hermes/mortality/SKILL.md
+  useCases:
+    - Mortality table lookup experiments
+    - Life-contingency teaching examples
+  limitations:
+    - Requires Julia runtime when executed
+    - Core install must not require Julia
