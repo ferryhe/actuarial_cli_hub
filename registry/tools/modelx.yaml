@@ -1,0 +1,39 @@
+id: actuarial.life.modelx
+version: actuarial-model-runtime.v1
+name: modelx Runtime Support
+status: cataloged
+category: life_modeling
+priority: P1/P2
+upstream:
+  repo: https://github.com/fumitoh/modelx
+  package: modelx
+  language: python
+  license: MIT
+  install: 'pip install modelx'
+conversion:
+  class: python-model-runner
+  form: supporting model runtime for lifelib-like workflows
+  dependencyWeight: medium
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: optional-cli
+  command:
+    - actuary
+    - doctor
+    - --runtime
+    - modelx
+  allowedCommandPrefix: actuary doctor --runtime modelx
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+    - diagnostics
+agent:
+  skillPath: skills/hermes/life_modeling/SKILL.md
+  useCases:
+    - Readiness checks for modelx-backed life models
+  limitations:
+    - Not a standalone actuarial calculation wrapper
+    - Used through specific model runners

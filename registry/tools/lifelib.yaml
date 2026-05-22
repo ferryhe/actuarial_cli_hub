@@ -1,0 +1,41 @@
+id: actuarial.life.lifelib
+version: actuarial-life-model.v1
+name: lifelib Template Runner
+status: cataloged
+category: life_modeling
+priority: P1/P2
+upstream:
+  repo: https://github.com/lifelib-dev/lifelib
+  package: lifelib
+  language: python
+  license: MIT
+  install: 'pip install lifelib modelx'
+conversion:
+  class: python-model-runner
+  form: template/project runner for life and IFRS-style examples
+  dependencyWeight: heavy
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: optional-cli
+  command:
+    - actuary
+    - life
+    - lifelib
+  allowedCommandPrefix: actuary life lifelib
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+    - deterministic_result
+    - diagnostics
+    - run_manifest
+agent:
+  skillPath: skills/hermes/life_modeling/SKILL.md
+  useCases:
+    - Life model template experiments
+    - IFRS 17 style educational workflows
+  limitations:
+    - Large model libraries remain upstream
+    - Optional dependencies must be checked by doctor

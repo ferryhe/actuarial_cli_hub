@@ -1,0 +1,40 @@
+id: actuarial.reserve.faslr
+version: actuarial-faslr.v1
+name: FASLR Reserving Workbench
+status: cataloged
+category: reserving
+priority: P3
+upstream:
+  repo: https://github.com/casact/FASLR
+  package: faslr
+  language: python
+  license: BSD-3-Clause
+  install: 'see upstream application instructions'
+conversion:
+  class: application-spike
+  form: catalog first; executable wrapper only after public API spike
+  dependencyWeight: heavy
+  readiness: Status is intentionally conservative until fixtures and runtime tests are added.
+runtime:
+  kind: reference
+  command:
+    - actuary
+    - reserve
+    - faslr
+  allowedCommandPrefix: actuary reserve faslr
+  timeoutMs: 300000
+  maxOutputBytes: 1048576
+io:
+  inputSchema: registry/schemas/reference-query.schema.json
+  outputSchema: registry/schemas/reference-result.schema.json
+  artifacts:
+    - diagnostics
+    - run_manifest
+agent:
+  skillPath: skills/hermes/reserving/SKILL.md
+  useCases:
+    - Catalog reserving workbench capabilities
+    - Spike possible public calculation APIs
+  limitations:
+    - GUI/application target is not assumed executable in v1
+    - Do not mark stable without a public CLI/API spike
