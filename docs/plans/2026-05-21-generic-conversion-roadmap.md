@@ -229,9 +229,9 @@ The CLI should always support explicit artifact paths:
 ```bash
 actuary reserve chainladder \
   --input examples/reserving/sample_triangle.csv \
-  --output .tmp/runs/demo/deterministic_result.json \
-  --diagnostics-output .tmp/runs/demo/diagnostics.json \
-  --explain-output .tmp/runs/demo/explanation.md \
+  --output .tmp/actuarial-cli-runs/demo/output/deterministic_result.json \
+  --diagnostics-output .tmp/actuarial-cli-runs/demo/output/diagnostics.json \
+  --explain-output .tmp/actuarial-cli-runs/demo/output/explanation.md \
   --json
 ```
 
@@ -265,7 +265,7 @@ The CLI should return a concise JSON envelope on stdout:
   "artifacts": {
     "deterministic_result": "output/deterministic_result.json",
     "diagnostics": "output/diagnostics.json",
-    "explanation": "output/explanation.md"
+    "explanation_markdown": "output/explanation.md"
   },
   "warnings": []
 }
@@ -633,9 +633,18 @@ python scripts/run_actuarial_cli.py doctor --json
 **Commands:**
 
 ```bash
-python scripts/run_actuarial_cli.py reserve chainladder   --input examples/reserving/sample_triangle.csv   --output .tmp/runs/chainladder-demo/output/deterministic_result.json   --diagnostics-output .tmp/runs/chainladder-demo/output/diagnostics.json   --explain-output .tmp/runs/chainladder-demo/output/explanation.md   --json
+python scripts/run_actuarial_cli.py reserve chainladder \
+  --input examples/reserving/sample_triangle.csv \
+  --output .tmp/actuarial-cli-runs/chainladder-demo/output/deterministic_result.json \
+  --diagnostics-output .tmp/actuarial-cli-runs/chainladder-demo/output/diagnostics.json \
+  --explain-output .tmp/actuarial-cli-runs/chainladder-demo/output/explanation.md \
+  --json
 
-python scripts/run_actuarial_cli.py loss aggregate   --decl "agg MyLine 100 claims 1000 xs 0 sev lognorm 50 cv 1"   --output .tmp/runs/aggregate-demo/output/result.json   --explain-output .tmp/runs/aggregate-demo/output/explanation.md   --json
+python scripts/run_actuarial_cli.py loss aggregate \
+  --decl "agg MyLine 100 claims 1000 xs 0 sev lognorm 50 cv 1" \
+  --output .tmp/actuarial-cli-runs/aggregate-demo/output/result.json \
+  --explain-output .tmp/actuarial-cli-runs/aggregate-demo/output/explanation.md \
+  --json
 ```
 
 **Acceptance criteria:**
@@ -654,9 +663,9 @@ python scripts/run_actuarial_cli.py loss aggregate   --decl "agg MyLine 100 clai
 **Commands:**
 
 ```bash
-python scripts/run_actuarial_cli.py cashflow cashflower   --model examples/cashflower/simple_model.py   --assumptions examples/cashflower/assumptions.yaml   --output .tmp/runs/cashflower-demo/output/cashflows.json   --json
+python scripts/run_actuarial_cli.py cashflow cashflower   --model examples/cashflower/simple_model.py   --assumptions examples/cashflower/assumptions.yaml   --output .tmp/actuarial-cli-runs/cashflower-demo/output/cashflows.json   --json
 
-python scripts/run_actuarial_cli.py life lifelib   --template basiclife   --scenario examples/lifelib/scenario.yaml   --output .tmp/runs/lifelib-demo/output/result.json   --json
+python scripts/run_actuarial_cli.py life lifelib   --template basiclife   --scenario examples/lifelib/scenario.yaml   --output .tmp/actuarial-cli-runs/lifelib-demo/output/result.json   --json
 ```
 
 **Acceptance criteria:**
@@ -676,11 +685,11 @@ python scripts/run_actuarial_cli.py life lifelib   --template basiclife   --scen
 **Commands:**
 
 ```bash
-python scripts/run_actuarial_cli.py mortality table   --source julia-actuary   --table examples/mortality/table_request.yaml   --output .tmp/runs/mortality-demo/output/result.json   --json
+python scripts/run_actuarial_cli.py mortality table   --source julia-actuary   --table examples/mortality/table_request.yaml   --output .tmp/actuarial-cli-runs/mortality-demo/output/result.json   --json
 
-python scripts/run_actuarial_cli.py lifecontingencies r   --input examples/lifecontingencies/case.yaml   --output .tmp/runs/lifecontingencies-demo/output/result.json   --json
+python scripts/run_actuarial_cli.py lifecontingencies r   --input examples/lifecontingencies/case.yaml   --output .tmp/actuarial-cli-runs/lifecontingencies-demo/output/result.json   --json
 
-python scripts/run_actuarial_cli.py pricing insurancerating   --input examples/insurancerating/glm_case.yaml   --output .tmp/runs/insurancerating-demo/output/result.json   --json
+python scripts/run_actuarial_cli.py pricing insurancerating   --input examples/insurancerating/glm_case.yaml   --output .tmp/actuarial-cli-runs/insurancerating-demo/output/result.json   --json
 ```
 
 **Acceptance criteria:**
@@ -703,7 +712,10 @@ python scripts/run_actuarial_cli.py pricing insurancerating   --input examples/i
 ```bash
 python scripts/run_actuarial_cli.py registry import-catalog   --source examples/catalogs/actuarial-foss.yaml   --output registry/generated/catalog.json   --json
 
-python scripts/run_actuarial_cli.py reference lda search   --query "collective risk model aggregate loss"   --output .tmp/runs/lda-search/output/results.json   --json
+python scripts/run_actuarial_cli.py reference lda search \
+  --query "collective risk model aggregate loss" \
+  --output .tmp/actuarial-cli-runs/lda-search/output/results.json \
+  --json
 ```
 
 **Acceptance criteria:**
@@ -811,7 +823,12 @@ pytest -q
 
 ```bash
 python scripts/run_actuarial_cli.py reserve chainladder --help
-python scripts/run_actuarial_cli.py reserve chainladder   --input examples/reserving/sample_triangle.csv   --output .tmp/test-chainladder/deterministic_result.json   --diagnostics-output .tmp/test-chainladder/diagnostics.json   --explain-output .tmp/test-chainladder/explanation.md   --json
+python scripts/run_actuarial_cli.py reserve chainladder \
+  --input examples/reserving/sample_triangle.csv \
+  --output .tmp/test-chainladder/deterministic_result.json \
+  --diagnostics-output .tmp/test-chainladder/diagnostics.json \
+  --explain-output .tmp/test-chainladder/explanation.md \
+  --json
 pytest tests/test_chainladder_cli.py tests/test_reserving_contracts.py -q
 pytest -q
 ```
@@ -824,7 +841,11 @@ pytest -q
 
 ```bash
 python scripts/run_actuarial_cli.py loss aggregate --help
-python scripts/run_actuarial_cli.py loss aggregate   --decl "agg MyLine 100 claims 1000 xs 0 sev lognorm 50 cv 1"   --output .tmp/test-aggregate/result.json   --explain-output .tmp/test-aggregate/explanation.md   --json
+python scripts/run_actuarial_cli.py loss aggregate \
+  --decl "agg MyLine 100 claims 1000 xs 0 sev lognorm 50 cv 1" \
+  --output .tmp/test-aggregate/result.json \
+  --explain-output .tmp/test-aggregate/explanation.md \
+  --json
 pytest tests/test_aggregate_cli.py tests/test_aggregate_contracts.py -q
 pytest -q
 ```
