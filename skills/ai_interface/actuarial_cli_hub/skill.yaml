@@ -1,0 +1,364 @@
+schema_version: ai-interface-preview.v1
+preview_only: true
+source: ferryhe/actuarial_cli_hub
+note: Preview export only; ai_interface must add its own fallback mapping before executing
+  this sibling repo.
+tools:
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.catalog.actuarial_foss
+  name: Actuarial FOSS Catalog
+  status: cataloged
+  priority: P0/P1
+  runtime:
+    kind: catalog
+    availability: planned
+    command:
+    - actuary
+    - registry
+    - import-catalog
+    allowedCommandPrefix: actuary registry import-catalog
+  io:
+    inputSchema: registry/schemas/reference-query.schema.json
+    outputSchema: registry/schemas/reference-result.schema.json
+    artifacts:
+    - run_manifest
+    - diagnostics
+  agent:
+    useCases:
+    - Discover actuarial OSS candidates
+    - Seed future registry entries
+    limitations:
+    - Catalog entries must be reviewed before promotion
+    - Upstream licenses vary by project
+  upstream:
+    repo: https://github.com/terence-lim/actuarial-foss
+    package: actuarial-foss
+    language: catalog
+    license: varies
+    install: not applicable
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.loss.aggregate
+  name: Aggregate Loss
+  status: experimental
+  priority: P0
+  runtime:
+    kind: cli
+    availability: implemented
+    command:
+    - actuary
+    - loss
+    - aggregate
+    allowedCommandPrefix: actuary loss aggregate
+  io:
+    inputSchema: registry/schemas/aggregate-loss-input.schema.json
+    outputSchema: registry/schemas/aggregate-loss-result.schema.json
+    artifacts:
+    - aggregate_result
+    - diagnostics
+    - explanation_markdown
+  agent:
+    skillPath: skills/hermes/actuarial-aggregate-loss/SKILL.md
+    useCases:
+    - Aggregate loss and risk examples
+    - Teaching collective risk model workflows
+    limitations:
+    - DSL declarations must be reviewed by a qualified actuary
+    - The roadmap shorthand defaults to Poisson when no frequency family is supplied
+  upstream:
+    repo: https://github.com/mynl/aggregate
+    package: aggregate
+    language: python
+    license: BSD-3-Clause
+    install: pip install aggregate
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.cashflow.cashflower
+  name: Cashflower Cash-flow Runner
+  status: cataloged
+  priority: P1
+  runtime:
+    kind: cli
+    availability: planned
+    command:
+    - actuary
+    - cashflow
+    - cashflower
+    allowedCommandPrefix: actuary cashflow cashflower
+  io:
+    inputSchema: registry/schemas/model-run-input.schema.json
+    outputSchema: registry/schemas/model-run-result.schema.json
+    artifacts:
+    - deterministic_result
+    - diagnostics
+  agent:
+    useCases:
+    - Cash-flow model demo runs
+    - Agent-readable model output artifacts
+    limitations:
+    - Model code is user supplied and must be reviewed
+    - Wrapper is not implemented until P1 runtime PR
+  upstream:
+    repo: https://github.com/acturtle/cashflower
+    package: cashflower
+    language: python
+    license: MIT
+    install: pip install cashflower
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.reserve.chainladder
+  name: Chainladder Reserving
+  status: experimental
+  priority: P0
+  runtime:
+    kind: cli
+    availability: implemented
+    command:
+    - actuary
+    - reserve
+    - chainladder
+    allowedCommandPrefix: actuary reserve chainladder
+  io:
+    inputSchema: registry/schemas/reserving-triangle.schema.json
+    outputSchema: registry/schemas/reserving-result.schema.json
+    artifacts:
+    - deterministic_result
+    - diagnostics
+    - explanation_markdown
+  agent:
+    skillPath: skills/hermes/actuarial-reserving/SKILL.md
+    useCases:
+    - P&C loss reserving methodology validation
+    - triangle diagnostics
+    - reserving demo or teaching workflow
+    limitations:
+    - Not a regulatory-production reserving system
+    - Requires actuarial review before business use
+  upstream:
+    repo: https://github.com/casact/chainladder-python
+    package: chainladder
+    language: python
+    license: BSD-3-Clause
+    install: pip install chainladder
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.reserve.faslr
+  name: FASLR Reserving Workbench
+  status: cataloged
+  priority: P3
+  runtime:
+    kind: reference
+    availability: planned
+    command:
+    - actuary
+    - reserve
+    - faslr
+    allowedCommandPrefix: actuary reserve faslr
+  io:
+    inputSchema: registry/schemas/reference-query.schema.json
+    outputSchema: registry/schemas/reference-result.schema.json
+    artifacts:
+    - diagnostics
+    - run_manifest
+  agent:
+    useCases:
+    - Catalog reserving workbench capabilities
+    - Spike possible public calculation APIs
+    limitations:
+    - GUI/application target is not assumed executable in v1
+    - Do not mark stable without a public CLI/API spike
+  upstream:
+    repo: https://github.com/casact/FASLR
+    package: faslr
+    language: python
+    license: BSD-3-Clause
+    install: see upstream application instructions
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.pricing.insurancerating
+  name: R insurancerating
+  status: cataloged
+  priority: P2
+  runtime:
+    kind: optional-cli
+    availability: planned
+    command:
+    - actuary
+    - pricing
+    - insurancerating
+    allowedCommandPrefix: actuary pricing insurancerating
+  io:
+    inputSchema: registry/schemas/model-run-input.schema.json
+    outputSchema: registry/schemas/model-run-result.schema.json
+    artifacts:
+    - deterministic_result
+    - diagnostics
+  agent:
+    useCases:
+    - Pricing/rating examples
+    - R adapter contract validation
+    limitations:
+    - Requires R runtime when executed
+    - No production pricing claim
+  upstream:
+    repo: https://cran.r-project.org/package=insurancerating
+    package: insurancerating
+    language: r
+    license: GPL-2/GPL-3
+    install: Rscript install.packages("insurancerating")
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.lifecontingencies.r
+  name: R lifecontingencies
+  status: cataloged
+  priority: P2
+  runtime:
+    kind: optional-cli
+    availability: planned
+    command:
+    - actuary
+    - lifecontingencies
+    - r
+    allowedCommandPrefix: actuary lifecontingencies r
+  io:
+    inputSchema: registry/schemas/model-run-input.schema.json
+    outputSchema: registry/schemas/model-run-result.schema.json
+    artifacts:
+    - deterministic_result
+    - diagnostics
+  agent:
+    useCases:
+    - Life contingency examples through R
+    - Cross-runtime adapter validation
+    limitations:
+    - Requires R runtime when executed
+    - Tests must skip gracefully when R is absent
+  upstream:
+    repo: https://cran.r-project.org/package=lifecontingencies
+    package: lifecontingencies
+    language: r
+    license: GPL-2/GPL-3
+    install: Rscript install.packages("lifecontingencies")
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.life.lifelib
+  name: lifelib Template Runner
+  status: cataloged
+  priority: P1/P2
+  runtime:
+    kind: optional-cli
+    availability: planned
+    command:
+    - actuary
+    - life
+    - lifelib
+    allowedCommandPrefix: actuary life lifelib
+  io:
+    inputSchema: registry/schemas/model-run-input.schema.json
+    outputSchema: registry/schemas/model-run-result.schema.json
+    artifacts:
+    - deterministic_result
+    - diagnostics
+    - run_manifest
+  agent:
+    useCases:
+    - Life model template experiments
+    - IFRS 17 style educational workflows
+    limitations:
+    - Large model libraries remain upstream
+    - Optional dependencies must be checked by doctor
+  upstream:
+    repo: https://github.com/lifelib-dev/lifelib
+    package: lifelib
+    language: python
+    license: MIT
+    install: pip install lifelib modelx
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.reference.loss_data_analytics
+  name: Loss Data Analytics Materials
+  status: external-reference
+  priority: P3
+  runtime:
+    kind: reference
+    availability: planned
+    command:
+    - actuary
+    - reference
+    - lda
+    - search
+    allowedCommandPrefix: actuary reference lda search
+  io:
+    inputSchema: registry/schemas/reference-query.schema.json
+    outputSchema: registry/schemas/reference-result.schema.json
+    artifacts:
+    - reference_result
+    - diagnostics
+  agent:
+    useCases:
+    - Educational reference lookup
+    - Dataset/notebook cataloging
+    limitations:
+    - Not an executable actuarial calculation engine
+    - Reference material may require citation and human interpretation
+  upstream:
+    repo: https://openacttexts.github.io/Loss-Data-Analytics/
+    package: loss-data-analytics
+    language: reference
+    license: CC-BY-NC-SA
+    install: not applicable
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.life.modelx
+  name: modelx Runtime Support
+  status: cataloged
+  priority: P1/P2
+  runtime:
+    kind: optional-cli
+    availability: planned
+    command:
+    - actuary
+    - doctor
+    - --runtime
+    - modelx
+    allowedCommandPrefix: actuary doctor --runtime modelx
+  io:
+    inputSchema: registry/schemas/model-run-input.schema.json
+    outputSchema: registry/schemas/model-run-result.schema.json
+    artifacts:
+    - diagnostics
+  agent:
+    useCases:
+    - Readiness checks for modelx-backed life models
+    limitations:
+    - Not a standalone actuarial calculation wrapper
+    - Used through specific model runners
+  upstream:
+    repo: https://github.com/fumitoh/modelx
+    package: modelx
+    language: python
+    license: MIT
+    install: pip install modelx
+- schema_version: actuarial-cli-tool-card.v1
+  id: actuarial.mortality.tables_jl
+  name: MortalityTables.jl
+  status: cataloged
+  priority: P2
+  runtime:
+    kind: optional-cli
+    availability: planned
+    command:
+    - actuary
+    - mortality
+    - table
+    allowedCommandPrefix: actuary mortality table
+  io:
+    inputSchema: registry/schemas/model-run-input.schema.json
+    outputSchema: registry/schemas/model-run-result.schema.json
+    artifacts:
+    - mortality_result
+    - diagnostics
+  agent:
+    useCases:
+    - Mortality table lookup experiments
+    - Life-contingency teaching examples
+    limitations:
+    - Requires Julia runtime when executed
+    - Core install must not require Julia
+  upstream:
+    repo: https://github.com/JuliaActuary/MortalityTables.jl
+    package: MortalityTables.jl
+    language: julia
+    license: MIT
+    install: julia package installation via Pkg

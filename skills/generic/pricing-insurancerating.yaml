@@ -1,0 +1,32 @@
+schema_version: actuarial-cli-tool-card.v1
+id: actuarial.pricing.insurancerating
+name: R insurancerating
+status: cataloged
+priority: P2
+runtime:
+  kind: optional-cli
+  availability: planned
+  command:
+  - actuary
+  - pricing
+  - insurancerating
+  allowedCommandPrefix: actuary pricing insurancerating
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+  - deterministic_result
+  - diagnostics
+agent:
+  useCases:
+  - Pricing/rating examples
+  - R adapter contract validation
+  limitations:
+  - Requires R runtime when executed
+  - No production pricing claim
+upstream:
+  repo: https://cran.r-project.org/package=insurancerating
+  package: insurancerating
+  language: r
+  license: GPL-2/GPL-3
+  install: Rscript install.packages("insurancerating")

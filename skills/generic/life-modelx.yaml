@@ -1,0 +1,31 @@
+schema_version: actuarial-cli-tool-card.v1
+id: actuarial.life.modelx
+name: modelx Runtime Support
+status: cataloged
+priority: P1/P2
+runtime:
+  kind: optional-cli
+  availability: planned
+  command:
+  - actuary
+  - doctor
+  - --runtime
+  - modelx
+  allowedCommandPrefix: actuary doctor --runtime modelx
+io:
+  inputSchema: registry/schemas/model-run-input.schema.json
+  outputSchema: registry/schemas/model-run-result.schema.json
+  artifacts:
+  - diagnostics
+agent:
+  useCases:
+  - Readiness checks for modelx-backed life models
+  limitations:
+  - Not a standalone actuarial calculation wrapper
+  - Used through specific model runners
+upstream:
+  repo: https://github.com/fumitoh/modelx
+  package: modelx
+  language: python
+  license: MIT
+  install: pip install modelx

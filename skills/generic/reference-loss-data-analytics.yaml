@@ -1,0 +1,33 @@
+schema_version: actuarial-cli-tool-card.v1
+id: actuarial.reference.loss_data_analytics
+name: Loss Data Analytics Materials
+status: external-reference
+priority: P3
+runtime:
+  kind: reference
+  availability: planned
+  command:
+  - actuary
+  - reference
+  - lda
+  - search
+  allowedCommandPrefix: actuary reference lda search
+io:
+  inputSchema: registry/schemas/reference-query.schema.json
+  outputSchema: registry/schemas/reference-result.schema.json
+  artifacts:
+  - reference_result
+  - diagnostics
+agent:
+  useCases:
+  - Educational reference lookup
+  - Dataset/notebook cataloging
+  limitations:
+  - Not an executable actuarial calculation engine
+  - Reference material may require citation and human interpretation
+upstream:
+  repo: https://openacttexts.github.io/Loss-Data-Analytics/
+  package: loss-data-analytics
+  language: reference
+  license: CC-BY-NC-SA
+  install: not applicable
