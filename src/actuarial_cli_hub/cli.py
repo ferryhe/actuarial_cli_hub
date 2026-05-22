@@ -120,6 +120,39 @@ def build_parser() -> argparse.ArgumentParser:
     lifelib.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
     lifelib.set_defaults(func=cmd_life_lifelib)
 
+    mortality = subparsers.add_parser("mortality", help="Run optional mortality adapters.")
+    mortality_sub = mortality.add_subparsers(dest="mortality_command", required=True)
+    mortality_table = mortality_sub.add_parser(
+        "table",
+        help="Boundary for JuliaActuary/MortalityTables.jl table lookups.",
+        description="Optional MortalityTables.jl wrapper boundary; use doctor to verify Julia before execution.",
+    )
+    mortality_table.add_argument("--run-id", default="mortality-table", help="Run identifier for the stdout envelope.")
+    mortality_table.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    mortality_table.set_defaults(func=cmd_mortality_table)
+
+    lifecontingencies = subparsers.add_parser("lifecontingencies", help="Run optional life-contingencies adapters.")
+    lifecontingencies_sub = lifecontingencies.add_subparsers(dest="lifecontingencies_command", required=True)
+    lifecontingencies_r = lifecontingencies_sub.add_parser(
+        "r",
+        help="Boundary for the R lifecontingencies package.",
+        description="Optional R lifecontingencies wrapper boundary; use doctor to verify R before execution.",
+    )
+    lifecontingencies_r.add_argument("--run-id", default="lifecontingencies-r", help="Run identifier for the stdout envelope.")
+    lifecontingencies_r.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    lifecontingencies_r.set_defaults(func=cmd_lifecontingencies_r)
+
+    pricing = subparsers.add_parser("pricing", help="Run optional pricing/rating adapters.")
+    pricing_sub = pricing.add_subparsers(dest="pricing_command", required=True)
+    insurancerating = pricing_sub.add_parser(
+        "insurancerating",
+        help="Boundary for the R insurancerating package.",
+        description="Optional R insurancerating wrapper boundary; use doctor to verify R before execution.",
+    )
+    insurancerating.add_argument("--run-id", default="insurancerating", help="Run identifier for the stdout envelope.")
+    insurancerating.add_argument("--json", action="store_true", help="Emit machine-readable JSON envelope.")
+    insurancerating.set_defaults(func=cmd_pricing_insurancerating)
+
     return parser
 
 
@@ -531,6 +564,88 @@ def cmd_cashflow_cashflower(args: argparse.Namespace) -> int:
         summary = payload["data"]["summary"]
         print(f"cashflower rows={payload['data']['row_count']} final_t={summary['final_t']}")
     return 0
+
+
+def cmd_mortality_table(args: argparse.Namespace) -> int:
+    return _cmd_optional_runtime_boundary(
+        args,
+        tool="actuarial.mortality.tables_jl",
+        runtime="julia",
+        package="MortalityTables.jl",
+        install="Install Julia and add MortalityTables.jl via Julia Pkg before running table lookups.",
+        next_step="Add fixture-backed table lookup scripts before promoting this wrapper to experimental.",
+    )
+
+
+def cmd_lifecontingencies_r(args: argparse.Namespace) -> int:
+    return _cmd_optional_runtime_boundary(
+        args,
+        tool="actuarial.lifecontingencies.r",
+        runtime="r",
+        package="lifecontingencies",
+        install='Install R and run install.packages("lifecontingencies") before execution.',
+        next_step="Add Rscript JSON fixtures for actuarial present value examples before promotion.",
+    )
+
+
+def cmd_pricing_insurancerating(args: argparse.Namespace) -> int:
+    return _cmd_optional_runtime_boundary(
+        args,
+        tool="actuarial.pricing.insurancerating",
+        runtime="r",
+        package="insurancerating",
+        install='Install R and run install.packages("insurancerating") before execution.',
+        next_step="Add Rscript JSON fixtures for pricing/rating examples before promotion.",
+    )
+
+
+def _cmd_optional_runtime_boundary(
+    args: argparse.Namespace,
+    *,
+    tool: str,
+    runtime: str,
+    package: str,
+    install: str,
+    next_step: str,
+) -> int:
+    runtime_status = _optional_runtime_status(runtime)
+    missing = runtime_status["missing"]
+    unavailable = runtime_status["unavailable"]
+    details = {
+        "runtime": runtime,
+        "package": package,
+        "install": install,
+        **runtime_status["details"],
+    }
+    if missing:
+        payload = error_envelope(
+            tool=tool,
+            run_id=args.run_id,
+            code="runtime_missing",
+            message=f"Optional {runtime} runtime is not installed. {install}",
+            details={**details, "missing": missing},
+        ).to_dict()
+    elif unavailable:
+        payload = error_envelope(
+            tool=tool,
+            run_id=args.run_id,
+            code="runtime_unavailable",
+            message=f"Optional {runtime} runtime was found but failed readiness checks.",
+            details={**details, "unavailable": unavailable},
+        ).to_dict()
+    else:
+        payload = error_envelope(
+            tool=tool,
+            run_id=args.run_id,
+            code="not_implemented",
+            message=f"{package} runtime boundary is present, but executable calculations are not implemented yet.",
+            details={**details, "next_step": next_step},
+        ).to_dict()
+    if args.json:
+        emit_json(payload)
+    else:
+        print(payload["error"]["message"], file=sys.stderr)
+    return 2
 
 
 def main(argv: Sequence[str] | None = None) -> int:
