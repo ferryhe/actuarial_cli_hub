@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "actuarial-cli-hub"
+version = "0.1.0"
+description = "Contract-first CLI hub for actuarial open-source tools"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "jsonschema>=4.18",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+]
+
+[project.scripts]
+actuary = "actuarial_cli_hub.cli:main"
+actuarial-cli-hub = "actuarial_cli_hub.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.data-files]
+"registry/schemas" = [
+  "registry/schemas/aggregate-loss-input.schema.json",
+  "registry/schemas/aggregate-loss-result.schema.json",
+  "registry/schemas/domain.schema.json",
+  "registry/schemas/envelope.schema.json",
+  "registry/schemas/model-run-input.schema.json",
+  "registry/schemas/model-run-result.schema.json",
+  "registry/schemas/reference-query.schema.json",
+  "registry/schemas/reference-result.schema.json",
+  "registry/schemas/reserving-result.schema.json",
+  "registry/schemas/reserving-triangle.schema.json",
+  "registry/schemas/tool-manifest.schema.json",
+]
+"registry/tools" = [
+  "registry/tools/actuarial-foss.yaml",
+  "registry/tools/aggregate.yaml",
+  "registry/tools/cashflower.yaml",
+  "registry/tools/chainladder-python.yaml",
+  "registry/tools/faslr.yaml",
+  "registry/tools/insurancerating-r.yaml",
+  "registry/tools/lifecontingencies-r.yaml",
+  "registry/tools/lifelib.yaml",
+  "registry/tools/loss-data-analytics.yaml",
+  "registry/tools/modelx.yaml",
+  "registry/tools/mortalitytables-jl.yaml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
