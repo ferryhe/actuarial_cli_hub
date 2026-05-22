@@ -1,0 +1,9 @@
+assumptions:
+  initial_premium: 100.0
+  growth_rate: 0.02
+  claim_ratio: 0.6
+settings:
+  T_MAX_CALCULATION: 3
+  T_MAX_OUTPUT: 3
+  SAVE_OUTPUT: false
+  SAVE_DIAGNOSTIC: true
