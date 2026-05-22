@@ -44,23 +44,13 @@ The current roadmap lives in [`docs/plans/2026-05-21-generic-conversion-roadmap.
 
 ## Current validation
 
-Until the package skeleton lands, validate the catalog with:
+Use the repo-local script from a sibling checkout, or `python -m actuarial_cli_hub` after installation:
 
 ```bash
-python -m json.tool registry/schemas/tool-manifest.schema.json >/dev/null
-python - <<'PY'
-import json, pathlib, yaml
-from jsonschema import Draft202012Validator
-
-schema = json.loads(pathlib.Path('registry/schemas/tool-manifest.schema.json').read_text())
-validator = Draft202012Validator(schema)
-paths = sorted(pathlib.Path('registry/tools').glob('*.yaml'))
-assert len(paths) >= 10, paths
-for path in paths:
-    data = yaml.safe_load(path.read_text())
-    errors = sorted(validator.iter_errors(data), key=lambda err: list(err.path))
-    assert not errors, (path, [error.message for error in errors])
-print('catalog schema validation ok')
-PY
+python scripts/run_actuarial_cli.py registry validate --json
+pytest -q
+python scripts/run_actuarial_cli.py doctor --json
 git diff --check
 ```
+
+For new wrappers, follow [`docs/add-a-wrapper.md`](docs/add-a-wrapper.md). For release readiness, use [`docs/release-checklist.md`](docs/release-checklist.md).
